@@ -1,0 +1,12 @@
+-- User Seed Data
+-- Insert default users for testing
+
+INSERT INTO users (username, email, password, role, first_name, last_name, student_id, grade_level, balance) VALUES
+('admin', 'admin@school.edu', '$2a$10$example.hash.here', 'admin', 'System', 'Administrator', NULL, NULL, 0.00),
+('john_doe', 'john.doe@student.school.edu', '$2a$10$example.hash.here', 'student', 'John', 'Doe', 'STU001', '10', 25.50),
+('jane_smith', 'jane.smith@student.school.edu', '$2a$10$example.hash.here', 'student', 'Jane', 'Smith', 'STU002', '11', 18.75),
+('teacher1', 'teacher1@school.edu', '$2a$10$example.hash.here', 'teacher', 'Sarah', 'Johnson', 'TCH001', NULL, 50.00),
+('cafeteria_staff', 'staff@school.edu', '$2a$10$example.hash.here', 'staff', 'Mike', 'Wilson', 'STF001', NULL, 0.00);
+
+-- Note: In production, passwords should be properly hashed
+-- Example password for all users: 'password123'
