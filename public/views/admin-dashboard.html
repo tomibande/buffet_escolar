@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - Cafetería Escolar</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-cog"></i>
+                <span>Panel de Administrador</span>
+            </div>
+            <div class="nav-actions">
+                <div class="user-menu">
+                    <button class="user-btn" id="userBtn">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Administrador</span>
+                    </button>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Panel de Administración</h1>
+            <p>Gestiona productos y precios de la cafetería</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="showAddProductModal()">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+        </div>
+
+        <!-- Products Management -->
+        <div class="products-section">
+            <h3>Gestión de Productos</h3>
+            <div class="products-grid" id="productsGrid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <i class="fas fa-utensils"></i>
+                <h3 id="modalTitle">Agregar Producto</h3>
+                <button class="modal-close" onclick="closeModal('productModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productName">Nombre del Producto</label>
+                            <input type="text" id="productName" name="name" required placeholder="Ej: Sándwich de Pollo">
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Precio ($)</label>
+                            <input type="number" id="productPrice" name="price" required placeholder="850" min="0" step="1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productDescription">Descripción</label>
+                        <textarea id="productDescription" name="description" required placeholder="Descripción del producto"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productCategory">Categoría</label>
+                            <select id="productCategory" name="category" required>
+                                <option value="">Seleccionar categoría</option>
+                                <option value="principal">Plato Principal</option>
+                                <option value="acompañamiento">Acompañamiento</option>
+                                <option value="bebida">Bebida</option>
+                                <option value="postre">Postre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="productImage">URL de Imagen</label>
+                            <input type="url" id="productImage" name="image" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('productModal')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="saveProduct()">
+                    <i class="fas fa-save"></i>
+                    Guardar Producto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.username || user.role !== 'admin') {
+            window.location.href = '/api/auth/login';
+        }
+
+        let products = [];
+        let editingProductId = null;
+
+        // Load products
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const result = await response.json();
+                if (result.success) {
+                    products = result.data;
+                    renderProducts();
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function renderProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Sin+Imagen'">
+                    </div>
+                    <div class="product-info">
+                        <h4>${product.name}</h4>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-details">
+                            <span class="product-price">$${product.price}</span>
+                            <span class="product-category">${product.category}</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddProductModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Agregar Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                editingProductId = productId;
+                document.getElementById('modalTitle').textContent = 'Editar Producto';
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productImage').value = product.image;
+                document.getElementById('productModal').classList.add('active');
+            }
+        }
+
+        async function saveProduct() {
+            const formData = new FormData(document.getElementById('productForm'));
+            const productData = {
+                name: formData.get('name'),
+                price: parseInt(formData.get('price')),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                image: formData.get('image') || 'https://via.placeholder.com/200x150?text=Sin+Imagen'
+            };
+
+            try {
+                const url = editingProductId 
+                    ? `/api/products/${editingProductId}` 
+                    : '/api/products';
+                const method = editingProductId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    closeModal('productModal');
+                    loadProducts();
+                    alert(result.message);
+                } else {
+                    alert(result.message || 'Error al guardar el producto');
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert('Error al guardar el producto');
+            }
+        }
+
+        async function deleteProduct(productId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                try {
+                    const response = await fetch(`/api/products/${productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        loadProducts();
+                        alert(result.message);
+                    } else {
+                        alert(result.message || 'Error al eliminar el producto');
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    alert('Error al eliminar el producto');
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/api/auth/login';
+        });
+
+        // User dropdown
+        document.getElementById('userBtn').addEventListener('click', () => {
+            document.getElementById('userDropdown').classList.toggle('active');
+        });
+
+        // Load products on page load
+        loadProducts();
+    </script>
+</body>
+</html>

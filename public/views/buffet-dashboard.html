@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Buffet - Cafetería Escolar</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-utensils"></i>
+                <span>Panel de Buffet</span>
+            </div>
+            <div class="nav-actions">
+                <div class="user-menu">
+                    <button class="user-btn" id="userBtn">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Personal de Buffet</span>
+                    </button>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Panel de Control del Buffet</h1>
+            <p>Gestiona las ventas y estadísticas de la cafetería</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Ingresos Totales</h3>
+                    <div class="stat-value" id="totalRevenue">$0</div>
+                    <p class="stat-change positive">+12% desde ayer</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Pedidos Hoy</h3>
+                    <div class="stat-value" id="todayOrders">0</div>
+                    <p class="stat-change positive">+8% desde ayer</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Producto Más Vendido</h3>
+                    <div class="stat-value" id="topProduct">-</div>
+                    <p class="stat-change">Hoy</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Tiempo Promedio</h3>
+                    <div class="stat-value">18 min</div>
+                    <p class="stat-change negative">-2 min desde ayer</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>Ventas por Día</h3>
+                <div class="sales-chart">
+                    <div class="chart-container">
+                        <div class="chart-bar" style="height: 60%" data-value="$1200">
+                            <span class="bar-value">$1200</span>
+                            <span class="bar-label">Lun</span>
+                        </div>
+                        <div class="chart-bar" style="height: 80%" data-value="$1600">
+                            <span class="bar-value">$1600</span>
+                            <span class="bar-label">Mar</span>
+                        </div>
+                        <div class="chart-bar" style="height: 45%" data-value="$900">
+                            <span class="bar-value">$900</span>
+                            <span class="bar-label">Mié</span>
+                        </div>
+                        <div class="chart-bar" style="height: 90%" data-value="$1800">
+                            <span class="bar-value">$1800</span>
+                            <span class="bar-label">Jue</span>
+                        </div>
+                        <div class="chart-bar" style="height: 100%" data-value="$2000">
+                            <span class="bar-value">$2000</span>
+                            <span class="bar-label">Vie</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Productos Más Vendidos</h3>
+                <div class="top-products" id="topProductsList">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="recent-orders">
+            <h3>Pedidos Recientes</h3>
+            <div class="orders-table">
+                <div class="table-header">
+                    <span>Pedido</span>
+                    <span>Cliente</span>
+                    <span>Productos</span>
+                    <span>Total</span>
+                    <span>Estado</span>
+                    <span>Hora</span>
+                </div>
+                <div class="table-body" id="recentOrdersList">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.username || user.role !== 'buffet') {
+            window.location.href = '/api/auth/login';
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/products/sales-stats', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    updateDashboard(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update total revenue
+            document.getElementById('totalRevenue').textContent = `$${data.totalRevenue}`;
+            
+            // Update today's orders (mock data)
+            document.getElementById('todayOrders').textContent = '47';
+            
+            // Update top product
+            if (data.topProducts.length > 0) {
+                document.getElementById('topProduct').textContent = data.topProducts[0].productName;
+            }
+            
+            // Update top products list
+            const topProductsList = document.getElementById('topProductsList');
+            topProductsList.innerHTML = data.topProducts.map((product, index) => `
+                <div class="product-item">
+                    <div class="product-rank">${index + 1}</div>
+                    <div class="product-info">
+                        <h4>${product.productName}</h4>
+                        <p>${product.quantity} vendidos - $${product.revenue}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update recent orders (mock data)
+            const recentOrdersList = document.getElementById('recentOrdersList');
+            const mockOrders = [
+                { id: 'ORD-001', customer: 'Ana García', items: 'Pizza, Jugo', total: '$950', status: 'Completado', time: '14:30' },
+                { id: 'ORD-002', customer: 'Carlos López', items: 'Sándwich, Papas', total: '$1200', status: 'Preparando', time: '14:25' },
+                { id: 'ORD-003', customer: 'María Rodríguez', items: 'Ensalada, Agua', total: '$650', status: 'Completado', time: '14:20' }
+            ];
+            
+            recentOrdersList.innerHTML = mockOrders.map(order => `
+                <div class="table-row">
+                    <span>${order.id}</span>
+                    <span>${order.customer}</span>
+                    <span>${order.items}</span>
+                    <span>${order.total}</span>
+                    <span class="status ${order.status.toLowerCase()}">${order.status}</span>
+                    <span>${order.time}</span>
+                </div>
+            `).join('');
+        }
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/api/auth/login';
+        });
+
+        // User dropdown
+        document.getElementById('userBtn').addEventListener('click', () => {
+            document.getElementById('userDropdown').classList.toggle('active');
+        });
+
+        // Load data on page load
+        loadDashboardData();
+    </script>
+</body>
+</html>

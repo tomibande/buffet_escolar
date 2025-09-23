@@ -3,9 +3,18 @@ class UserModel {
   static users = [
     {
       id: 1,
+      username: 'buffet',
+      email: 'buffet@school.edu',
+      password: '$2a$10$example.hash.here',
+      role: 'buffet',
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: 2,
       username: 'admin',
       email: 'admin@school.edu',
-      password: '$2a$10$example.hash.here',
+      password: '$2a$10$admin123.hash.here',
       role: 'admin',
       created_at: new Date(),
       updated_at: new Date()
@@ -32,6 +41,9 @@ class UserModel {
     return this.users.find(u => u.email === email);
   }
 
+  static async findByUsername(username) {
+    return this.users.find(u => u.username === username);
+  }
   static async create(userData) {
     const newUser = {
       id: this.users.length + 1,

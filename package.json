@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mercadopago": "^2.9.0",
+    "uuid": "^13.0.0"
+  }
+}

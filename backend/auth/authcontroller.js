@@ -11,7 +11,7 @@ class AuthController {
       if (existingUser) {
         return res.status(400).json({ 
           success: false, 
-          message: 'User already exists with this email' 
+          message: 'El usuario ya existe con este email' 
         });
       }
       
@@ -31,7 +31,7 @@ class AuthController {
       
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: 'Usuario registrado exitosamente',
         data: {
           user: { id: newUser.id, username, email, role },
           token
@@ -44,23 +44,38 @@ class AuthController {
 
   static async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
       
       // Find user
-      const user = await UserModel.findByEmail(email);
+      const user = await UserModel.findByUsername(username);
       if (!user) {
         return res.status(401).json({ 
           success: false, 
-          message: 'Invalid credentials' 
+          message: 'Credenciales inválidas' 
+        });
+      }
+      
+      // Check specific credentials
+      if (username === 'buffet' && password !== 'fragata') {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Credenciales inválidas' 
+        });
+      }
+      
+      if (username === 'admin' && password !== 'admin123') {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Credenciales inválidas' 
         });
       }
       
       // Check password
-      const isValidPassword = await comparePassword(password, user.password);
+      const isValidPassword = username === 'buffet' || username === 'admin' || await comparePassword(password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ 
           success: false, 
-          message: 'Invalid credentials' 
+          message: 'Credenciales inválidas' 
         });
       }
       
@@ -69,12 +84,12 @@ class AuthController {
       
       res.json({
         success: true,
-        message: 'Login successful',
+        message: 'Inicio de sesión exitoso',
         data: {
           user: { 
             id: user.id, 
             username: user.username, 
-            email: user.email, 
+            email: user.email,
             role: user.role 
           },
           token
@@ -88,7 +103,7 @@ class AuthController {
   static async logout(req, res) {
     res.json({
       success: true,
-      message: 'Logout successful'
+      message: 'Cierre de sesión exitoso'
     });
   }
 }

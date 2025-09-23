@@ -6,6 +6,7 @@ class CafeteriaApp {
         this.user = null;
         this.menuItems = [];
         this.currentSection = 'home';
+        this.mp = null;
         
         this.init();
     }
@@ -16,6 +17,15 @@ class CafeteriaApp {
         this.setupEventListeners();
         this.setupAnimations();
         this.updateCartDisplay();
+        this.initializeMercadoPago();
+    }
+
+    initializeMercadoPago() {
+        if (typeof MercadoPago !== 'undefined') {
+            this.mp = new MercadoPago('TEST-your-public-key', {
+                locale: 'es-AR'
+            });
+        }
     }
 
     loadUser() {
@@ -28,75 +38,22 @@ class CafeteriaApp {
 
     updateUserDisplay() {
         if (this.user) {
-            document.querySelector('.user-btn span').textContent = this.user.username;
-            document.getElementById('userBalance').textContent = `$${this.user.balance || '25.50'}`;
+            document.querySelector('.user-btn span').textContent = 'Estudiante';
         }
     }
 
-    loadMenuItems() {
-        // Sample menu items - in production, this would come from the API
-        this.menuItems = [
-            {
-                id: 1,
-                name: 'Chicken Sandwich',
-                description: 'Grilled chicken breast with lettuce, tomato, and mayo',
-                price: 4.25,
-                category: 'main',
-                image: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.5
-            },
-            {
-                id: 2,
-                name: 'Fresh Garden Salad',
-                description: 'Mixed greens with cherry tomatoes, cucumbers, and dressing',
-                price: 2.75,
-                category: 'main',
-                image: 'https://images.pexels.com/photos/1059905/pexels-photo-1059905.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.2
-            },
-            {
-                id: 3,
-                name: 'Pizza Slice',
-                description: 'Classic cheese pizza with marinara sauce',
-                price: 3.50,
-                category: 'main',
-                image: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.7
-            },
-            {
-                id: 4,
-                name: 'French Fries',
-                description: 'Crispy golden fries with sea salt',
-                price: 1.75,
-                category: 'sides',
-                image: 'https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.3
-            },
-            {
-                id: 5,
-                name: 'Orange Juice',
-                description: 'Fresh squeezed orange juice',
-                price: 1.50,
-                category: 'drinks',
-                image: 'https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.1
-            },
-            {
-                id: 6,
-                name: 'Chocolate Chip Cookie',
-                description: 'Warm, freshly baked chocolate chip cookie',
-                price: 1.25,
-                category: 'desserts',
-                image: 'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg?auto=compress&cs=tinysrgb&w=400',
-                available: true,
-                rating: 4.8
+    async loadMenuItems() {
+        try {
+            const response = await fetch('/api/products');
+            const result = await response.json();
+            if (result.success) {
+                this.menuItems = result.data;
             }
-        ];
+        } catch (error) {
+            console.error('Error loading menu items:', error);
+            // Fallback to empty array
+            this.menuItems = [];
+        }
 
         this.renderMenuItems();
     }
@@ -114,7 +71,7 @@ class CafeteriaApp {
                     <div class="menu-item-overlay">
                         <button class="btn btn-primary" onclick="app.addToCart(${item.id})">
                             <i class="fas fa-plus"></i>
-                            Add to Cart
+                            Agregar al Carrito
                         </button>
                     </div>
                 </div>
@@ -128,9 +85,9 @@ class CafeteriaApp {
                     </div>
                     <p class="menu-item-description">${item.description}</p>
                     <div class="menu-item-footer">
-                        <span class="menu-item-price">$${item.price.toFixed(2)}</span>
+                        <span class="menu-item-price">$${item.price}</span>
                         <span class="menu-item-status ${item.available ? 'available' : 'unavailable'}">
-                            ${item.available ? 'Available' : 'Sold Out'}
+                            ${item.available ? 'Disponible' : 'Agotado'}
                         </span>
                     </div>
                 </div>
@@ -340,15 +297,15 @@ class CafeteriaApp {
 
         // Update cart total
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        cartTotal.textContent = total.toFixed(2);
+        cartTotal.textContent = total;
 
         // Update cart items
         if (this.cart.length === 0) {
             cartItems.innerHTML = `
                 <div class="cart-empty">
                     <i class="fas fa-shopping-cart"></i>
-                    <p>Your cart is empty</p>
-                    <p>Add some delicious items from our menu!</p>
+                    <p>Tu carrito está vacío</p>
+                    <p>¡Agrega algunos productos deliciosos de nuestro menú!</p>
                 </div>
             `;
         } else {
@@ -359,7 +316,7 @@ class CafeteriaApp {
                     </div>
                     <div class="cart-item-details">
                         <h4>${item.name}</h4>
-                        <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+                        <p class="cart-item-price">$${item.price}</p>
                     </div>
                     <div class="cart-item-controls">
                         <button class="quantity-btn" onclick="app.updateCartQuantity(${item.id}, ${item.quantity - 1})">
@@ -399,30 +356,95 @@ class CafeteriaApp {
 
     async checkout() {
         if (this.cart.length === 0) {
-            alert('Your cart is empty!');
+            alert('¡Tu carrito está vacío!');
             return;
         }
 
+        // Show payment modal to collect customer info
+        this.showModal('paymentModal');
+    }
+
+    async proceedToPayment() {
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        
+        if (!firstName || !lastName) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+
+        this.closeModal('paymentModal');
+        
         const loadingOverlay = document.getElementById('loadingOverlay');
         loadingOverlay.classList.add('active');
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Create Mercado Pago preference
+            const response = await fetch('/api/payments/create-preference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    items: this.cart,
+                    payer: {
+                        firstName,
+                        lastName
+                    }
+                })
+            });
 
-            // Clear cart
-            this.cart = [];
-            this.updateCartDisplay();
-            this.closeCart();
-
-            // Show success modal
-            this.showModal('successModal');
+            const result = await response.json();
+            
+            if (result.success && this.mp) {
+                // Create Mercado Pago wallet
+                await this.mp.bricks().create("wallet", "wallet_container", {
+                    initialization: {
+                        preferenceId: result.data.preferenceId,
+                    },
+                    callbacks: {
+                        onReady: () => {
+                            loadingOverlay.classList.remove('active');
+                            document.getElementById('wallet_container').style.display = 'block';
+                        },
+                        onSubmit: ({ selectedPaymentMethod, formData }) => {
+                            // Payment submitted
+                            this.handlePaymentSuccess(firstName, lastName);
+                        },
+                        onError: (error) => {
+                            console.error('Payment error:', error);
+                            loadingOverlay.classList.remove('active');
+                            alert('Error en el pago. Por favor intenta nuevamente.');
+                        }
+                    }
+                });
+            } else {
+                throw new Error('Error creating payment preference');
+            }
         } catch (error) {
             console.error('Checkout error:', error);
-            alert('An error occurred during checkout. Please try again.');
-        } finally {
             loadingOverlay.classList.remove('active');
+            alert('Ocurrió un error durante el pago. Por favor intenta nuevamente.');
         }
+    }
+
+    handlePaymentSuccess(firstName, lastName) {
+        // Generate order number and estimated time
+        const orderNumber = Math.floor(Math.random() * 9000) + 1000;
+        const estimatedTime = Math.floor(Math.random() * 20) + 10; // 10-30 minutes
+        
+        // Update success modal
+        document.getElementById('orderNumber').textContent = `#${orderNumber}`;
+        document.getElementById('estimatedTime').textContent = `${estimatedTime} minutos`;
+        
+        // Clear cart
+        this.cart = [];
+        this.updateCartDisplay();
+        this.closeCart();
+        
+        // Hide wallet and show success modal
+        document.getElementById('wallet_container').style.display = 'none';
+        this.showModal('orderSuccessModal');
     }
 
     showModal(modalId) {
@@ -445,6 +467,10 @@ class CafeteriaApp {
 // Global functions
 window.closeModal = (modalId) => {
     app.closeModal(modalId);
+};
+
+window.proceedToPayment = () => {
+    app.proceedToPayment();
 };
 
 // Initialize app when DOM is loaded

@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Cafeteria System</title>
+    <title>Sistema de Cafetería Escolar</title>
     <link rel="stylesheet" href="../styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -14,28 +15,23 @@
         <div class="nav-container">
             <div class="nav-brand">
                 <i class="fas fa-utensils"></i>
-                <span>School Cafeteria</span>
+                <span>Cafetería Escolar</span>
             </div>
             <div class="nav-menu" id="navMenu">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#menu" class="nav-link">Menu</a>
-                <a href="#orders" class="nav-link">My Orders</a>
-                <a href="#balance" class="nav-link">Balance</a>
+                <a href="#home" class="nav-link active">Inicio</a>
+                <a href="#menu" class="nav-link">Menú</a>
+                <a href="#orders" class="nav-link">Mis Pedidos</a>
             </div>
             <div class="nav-actions">
-                <div class="balance-display">
-                    <i class="fas fa-wallet"></i>
-                    <span id="userBalance">$25.50</span>
-                </div>
                 <div class="user-menu">
                     <button class="user-btn" id="userBtn">
                         <i class="fas fa-user-circle"></i>
-                        <span>John Doe</span>
+                        <span>Estudiante</span>
                     </button>
                     <div class="dropdown-menu" id="userDropdown">
-                        <a href="#profile"><i class="fas fa-user"></i> Profile</a>
-                        <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
-                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <a href="#profile"><i class="fas fa-user"></i> Perfil</a>
+                        <a href="#settings"><i class="fas fa-cog"></i> Configuración</a>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
                     </div>
                 </div>
                 <button class="mobile-toggle" id="mobileToggle">
@@ -52,21 +48,21 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title">
-                    Welcome to Our
-                    <span class="gradient-text">School Cafeteria</span>
+                    Bienvenido a Nuestra
+                    <span class="gradient-text">Cafetería Escolar</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Fresh, delicious meals prepared daily for our school community. 
-                    Order ahead, skip the line, and enjoy your favorite foods!
+                    Comidas frescas y deliciosas preparadas diariamente para nuestra comunidad escolar.
+                    ¡Ordena con anticipación, evita las filas y disfruta de tus comidas favoritas!
                 </p>
                 <div class="hero-actions">
                     <button class="btn btn-primary" onclick="scrollToSection('menu')">
                         <i class="fas fa-utensils"></i>
-                        View Menu
+                        Ver Menú
                     </button>
                     <button class="btn btn-secondary" onclick="scrollToSection('orders')">
                         <i class="fas fa-shopping-cart"></i>
-                        My Orders
+                        Mis Pedidos
                     </button>
                 </div>
             </div>
@@ -85,16 +81,16 @@
     <section id="menu" class="menu-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Today's Menu</h2>
-                <p class="section-subtitle">Fresh ingredients, prepared with care</p>
+                <h2 class="section-title">Menú de Hoy</h2>
+                <p class="section-subtitle">Ingredientes frescos, preparados con cuidado</p>
             </div>
             
             <div class="menu-filters">
-                <button class="filter-btn active" data-category="all">All Items</button>
-                <button class="filter-btn" data-category="main">Main Dishes</button>
-                <button class="filter-btn" data-category="sides">Sides</button>
-                <button class="filter-btn" data-category="drinks">Drinks</button>
-                <button class="filter-btn" data-category="desserts">Desserts</button>
+                <button class="filter-btn active" data-category="all">Todos</button>
+                <button class="filter-btn" data-category="principal">Platos Principales</button>
+                <button class="filter-btn" data-category="acompañamiento">Acompañamientos</button>
+                <button class="filter-btn" data-category="bebida">Bebidas</button>
+                <button class="filter-btn" data-category="postre">Postres</button>
             </div>
 
             <div class="menu-grid" id="menuGrid">
@@ -107,13 +103,13 @@
     <section id="orders" class="orders-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">My Orders</h2>
-                <p class="section-subtitle">Track your current and past orders</p>
+                <h2 class="section-title">Mis Pedidos</h2>
+                <p class="section-subtitle">Rastrea tus pedidos actuales y pasados</p>
             </div>
             
             <div class="orders-tabs">
-                <button class="tab-btn active" data-tab="current">Current Orders</button>
-                <button class="tab-btn" data-tab="history">Order History</button>
+                <button class="tab-btn active" data-tab="current">Pedidos Actuales</button>
+                <button class="tab-btn" data-tab="history">Historial de Pedidos</button>
             </div>
 
             <div class="orders-content">
@@ -122,7 +118,7 @@
                         <div class="order-header">
                             <div class="order-info">
                                 <h3>Order #ORD-001</h3>
-                                <span class="order-status preparing">Preparing</span>
+                                <span class="order-status preparing">Preparando</span>
                             </div>
                             <div class="order-time">
                                 <i class="fas fa-clock"></i>
@@ -131,20 +127,20 @@
                         </div>
                         <div class="order-items">
                             <div class="order-item">
-                                <span>Chicken Sandwich</span>
-                                <span>$4.25</span>
+                                <span>Sándwich de Pollo</span>
+                                <span>$850</span>
                             </div>
                             <div class="order-item">
-                                <span>Fresh Salad</span>
-                                <span>$2.75</span>
+                                <span>Ensalada Fresca</span>
+                                <span>$550</span>
                             </div>
                             <div class="order-item">
-                                <span>Orange Juice</span>
-                                <span>$1.50</span>
+                                <span>Jugo de Naranja</span>
+                                <span>$300</span>
                             </div>
                         </div>
                         <div class="order-total">
-                            <strong>Total: $8.50</strong>
+                            <strong>Total: $1700</strong>
                         </div>
                     </div>
                 </div>
@@ -154,81 +150,25 @@
                         <div class="order-header">
                             <div class="order-info">
                                 <h3>Order #ORD-002</h3>
-                                <span class="order-status completed">Completed</span>
+                                <span class="order-status completed">Completado</span>
                             </div>
                             <div class="order-date">
                                 <i class="fas fa-calendar"></i>
-                                <span>Yesterday, 12:30 PM</span>
+                                <span>Ayer, 12:30 PM</span>
                             </div>
                         </div>
                         <div class="order-items">
                             <div class="order-item">
-                                <span>Pizza Slice</span>
-                                <span>$3.50</span>
+                                <span>Porción de Pizza</span>
+                                <span>$700</span>
                             </div>
                             <div class="order-item">
-                                <span>Apple Juice</span>
-                                <span>$1.25</span>
+                                <span>Jugo de Manzana</span>
+                                <span>$250</span>
                             </div>
                         </div>
                         <div class="order-total">
-                            <strong>Total: $4.75</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Balance Section -->
-    <section id="balance" class="balance-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Account Balance</h2>
-                <p class="section-subtitle">Manage your cafeteria account</p>
-            </div>
-            
-            <div class="balance-grid">
-                <div class="balance-card">
-                    <div class="balance-info">
-                        <h3>Current Balance</h3>
-                        <div class="balance-amount">$25.50</div>
-                        <p class="balance-note">Last updated: Today, 9:00 AM</p>
-                    </div>
-                    <div class="balance-actions">
-                        <button class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Add Funds
-                        </button>
-                        <button class="btn btn-secondary">
-                            <i class="fas fa-history"></i>
-                            Transaction History
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="spending-chart">
-                    <h3>Weekly Spending</h3>
-                    <div class="chart-container">
-                        <div class="chart-bar" style="height: 60%">
-                            <span class="bar-value">$12</span>
-                            <span class="bar-label">Mon</span>
-                        </div>
-                        <div class="chart-bar" style="height: 80%">
-                            <span class="bar-value">$16</span>
-                            <span class="bar-label">Tue</span>
-                        </div>
-                        <div class="chart-bar" style="height: 45%">
-                            <span class="bar-value">$9</span>
-                            <span class="bar-label">Wed</span>
-                        </div>
-                        <div class="chart-bar" style="height: 90%">
-                            <span class="bar-value">$18</span>
-                            <span class="bar-label">Thu</span>
-                        </div>
-                        <div class="chart-bar" style="height: 70%">
-                            <span class="bar-value">$14</span>
-                            <span class="bar-label">Fri</span>
+                            <strong>Total: $950</strong>
                         </div>
                     </div>
                 </div>
@@ -239,7 +179,7 @@
     <!-- Cart Sidebar -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
-            <h3>Your Order</h3>
+            <h3>Tu Pedido</h3>
             <button class="cart-close" id="cartClose">
                 <i class="fas fa-times"></i>
             </button>
@@ -249,11 +189,11 @@
         </div>
         <div class="cart-footer">
             <div class="cart-total">
-                <strong>Total: $<span id="cartTotal">0.00</span></strong>
+                <strong>Total: $<span id="cartTotal">0</span></strong>
             </div>
             <button class="btn btn-primary btn-full" id="checkoutBtn">
-                <i class="fas fa-credit-card"></i>
-                Checkout
+                <i class="fas fa-shopping-cart"></i>
+                Pagar con Mercado Pago
             </button>
         </div>
     </div>
@@ -268,29 +208,62 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">
             <div class="spinner"></div>
-            <p>Processing your order...</p>
+            <p>Procesando tu pedido...</p>
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div class="modal" id="successModal">
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
         <div class="modal-content">
             <div class="modal-header">
-                <i class="fas fa-check-circle success-icon"></i>
-                <h3>Order Placed Successfully!</h3>
+                <i class="fas fa-user success-icon"></i>
+                <h3>Información del Cliente</h3>
             </div>
             <div class="modal-body">
-                <p>Your order has been placed and is being prepared.</p>
-                <p>Estimated time: <strong>15-20 minutes</strong></p>
+                <form id="customerForm">
+                    <div class="form-group">
+                        <label for="firstName">Nombre</label>
+                        <input type="text" id="firstName" name="firstName" required placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Apellido</label>
+                        <input type="text" id="lastName" name="lastName" required placeholder="Tu apellido">
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('successModal')">
-                    Continue
+                <button class="btn btn-secondary" onclick="closeModal('paymentModal')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="proceedToPayment()">
+                    Continuar al Pago
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Order Success Modal -->
+    <div class="modal" id="orderSuccessModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h3>¡Pedido Realizado con Éxito!</h3>
+            </div>
+            <div class="modal-body">
+                <p>Tu pedido ha sido procesado y está siendo preparado.</p>
+                <p>Número de pedido: <strong id="orderNumber">#1234</strong></p>
+                <p>Tiempo estimado: <strong id="estimatedTime">15-20 minutos</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('orderSuccessModal')">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mercado Pago Container -->
+    <div id="wallet_container" style="display: none;"></div>
     <script src="../scripts/main.js"></script>
 </body>
 </html>
