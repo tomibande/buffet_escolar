@@ -22,7 +22,7 @@ class CafeteriaApp {
 
     initializeMercadoPago() {
         if (typeof MercadoPago !== 'undefined') {
-            this.mp = new MercadoPago('TEST-your-public-key', {
+            this.mp = new MercadoPago('TEST-YOUR-PUBLIC-KEY', {
                 locale: 'es-AR'
             });
         }
@@ -398,7 +398,8 @@ class CafeteriaApp {
             
             if (result.success && this.mp) {
                 // Create Mercado Pago wallet
-                await this.mp.bricks().create("wallet", "wallet_container", {
+                const bricks = this.mp.bricks();
+                await bricks.create("wallet", "wallet_container", {
                     initialization: {
                         preferenceId: result.data.preferenceId,
                     },
@@ -407,7 +408,7 @@ class CafeteriaApp {
                             loadingOverlay.classList.remove('active');
                             document.getElementById('wallet_container').style.display = 'block';
                         },
-                        onSubmit: ({ selectedPaymentMethod, formData }) => {
+                        onSubmit: (data) => {
                             // Payment submitted
                             this.handlePaymentSuccess(firstName, lastName);
                         },
