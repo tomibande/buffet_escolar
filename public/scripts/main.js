@@ -17,17 +17,6 @@ class CafeteriaApp {
         this.setupEventListeners();
         this.setupAnimations();
         this.updateCartDisplay();
-        this.initializeMercadoPago();
-    }
-
-    initializeMercadoPago() {
-        // Initialize Mercado Pago when the script loads
-        if (typeof MercadoPago !== 'undefined') {
-            this.mp = new MercadoPago('TEST-2429502995306401-092321-8e4364b1e9ee3c0c38c5c0967b0f6365-191149729', {
-                locale: 'es-AR'
-            });
-            console.log('Mercado Pago initialized');
-        }
     }
 
     loadUser() {
@@ -174,12 +163,6 @@ class CafeteriaApp {
 
         document.getElementById('checkoutBtn').addEventListener('click', () => {
             this.checkout();
-        });
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.logout();
         });
 
         // Smooth scrolling for hero buttons
@@ -369,7 +352,7 @@ class CafeteriaApp {
     }
 
     // Handle Mercado Pago payment option
-    payWithMercadoPago() {
+    async payWithMercadoPago() {
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         
@@ -378,8 +361,36 @@ class CafeteriaApp {
             return;
         }
 
-        this.closeModal('paymentModal');
-        this.showModal('mercadoPagoModal');
+        try {
+            // Create pending order
+            const response = await fetch('/api/payments/create-pending-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    items: this.cart,
+                    payer: { firstName, lastName }
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.closeModal('paymentModal');
+                this.showModal('mercadoPagoModal');
+                
+                // Clear cart after creating order
+                this.cart = [];
+                this.updateCartDisplay();
+                this.closeCart();
+            } else {
+                alert(result.message || 'Error al crear el pedido');
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+            alert('Error al procesar el pedido');
+        }
     }
 
     showModal(modalId) {
