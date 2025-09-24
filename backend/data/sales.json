@@ -1,0 +1,38 @@
+[
+  {
+    "productId": 1,
+    "date": "2024-01-15",
+    "quantity": 25,
+    "revenue": 21250
+  },
+  {
+    "productId": 2,
+    "date": "2024-01-15",
+    "quantity": 15,
+    "revenue": 8250
+  },
+  {
+    "productId": 3,
+    "date": "2024-01-15",
+    "quantity": 30,
+    "revenue": 21000
+  },
+  {
+    "productId": 4,
+    "date": "2024-01-15",
+    "quantity": 40,
+    "revenue": 14000
+  },
+  {
+    "productId": 5,
+    "date": "2024-01-15",
+    "quantity": 35,
+    "revenue": 10500
+  },
+  {
+    "productId": 6,
+    "date": "2024-01-15",
+    "quantity": 20,
+    "revenue": 5000
+  }
+]

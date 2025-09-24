@@ -393,6 +393,15 @@ class CafeteriaApp {
             const result = await response.json();
             
             if (result.success && this.mp) {
+                // Record the sale before payment
+                await fetch('/api/products/record-sale', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ items: this.cart })
+                });
+                
                 // Create Mercado Pago wallet
                 const bricks = this.mp.bricks();
                 await bricks.create("wallet", "wallet_container", {

@@ -79,6 +79,21 @@ class PaymentController {
           timestamp: new Date().toISOString()
         });
         
+        // Record the sale in our system
+        if (req.body.items) {
+          try {
+            const response = await fetch('http://localhost:3000/api/products/record-sale', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ items: req.body.items })
+            });
+          } catch (error) {
+            console.error('Error recording sale:', error);
+          }
+        }
+        
         // Generate order details for successful payments
         const orderNumber = Math.floor(Math.random() * 9000) + 1000;
         const estimatedTime = Math.floor(Math.random() * 20) + 10; // 10-30 minutes

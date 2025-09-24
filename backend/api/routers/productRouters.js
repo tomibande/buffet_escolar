@@ -9,5 +9,6 @@ router.post('/', authenticateToken, authorizeRole(['admin']), ProductController.
 router.put('/:id', authenticateToken, authorizeRole(['admin']), ProductController.updateProduct);
 router.delete('/:id', authenticateToken, authorizeRole(['admin']), ProductController.deleteProduct);
 router.get('/sales-stats', authenticateToken, authorizeRole(['buffet', 'admin']), ProductController.getSalesStats);
+router.post('/record-sale', ProductController.recordSale);
 
 module.exports = router;
