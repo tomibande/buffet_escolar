@@ -118,7 +118,9 @@ class CafeteriaApp {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const section = link.getAttribute('href').substring(1);
-                this.navigateToSection(section);
+                if (section === 'menu') {
+                    this.navigateToSection(section);
+                }
             });
         });
 
@@ -146,28 +148,18 @@ class CafeteriaApp {
             }
         });
 
-        // Menu filters
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                const category = btn.getAttribute('data-category');
-                this.renderMenuItems(category);
+        // Setup menu filters after DOM is loaded
+        setTimeout(() => {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const category = btn.getAttribute('data-category');
+                    this.renderMenuItems(category);
+                });
             });
-        });
-
-        // Order tabs
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                btn.classList.add('active');
-                const tabId = btn.getAttribute('data-tab') + 'Orders';
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
+        }, 100);
 
         // Cart functionality
         document.getElementById('cartToggle').addEventListener('click', () => {
@@ -190,7 +182,11 @@ class CafeteriaApp {
 
         // Smooth scrolling for hero buttons
         window.scrollToSection = (sectionId) => {
-            this.navigateToSection(sectionId);
+            if (sectionId === 'menu') {
+                this.navigateToSection(sectionId);
+            } else if (sectionId === 'orders') {
+                this.toggleCart();
+            }
         };
     }
 

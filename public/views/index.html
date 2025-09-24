@@ -20,7 +20,6 @@
             <div class="nav-menu" id="navMenu">
                 <a href="#home" class="nav-link active">Inicio</a>
                 <a href="#menu" class="nav-link">Menú</a>
-                <a href="#orders" class="nav-link">Mis Pedidos</a>
             </div>
             <div class="nav-actions">
                 <div class="user-menu">
@@ -62,7 +61,7 @@
                     </button>
                     <button class="btn btn-secondary" onclick="scrollToSection('orders')">
                         <i class="fas fa-shopping-cart"></i>
-                        Mis Pedidos
+                        Ver Carrito
                     </button>
                 </div>
             </div>
@@ -95,83 +94,6 @@
 
             <div class="menu-grid" id="menuGrid">
                 <!-- Menu items will be populated by JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Orders Section -->
-    <section id="orders" class="orders-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Mis Pedidos</h2>
-                <p class="section-subtitle">Rastrea tus pedidos actuales y pasados</p>
-            </div>
-            
-            <div class="orders-tabs">
-                <button class="tab-btn active" data-tab="current">Pedidos Actuales</button>
-                <button class="tab-btn" data-tab="history">Historial de Pedidos</button>
-            </div>
-
-            <div class="orders-content">
-                <div class="tab-content active" id="currentOrders">
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div class="order-info">
-                                <h3>Order #ORD-001</h3>
-                                <span class="order-status preparing">Preparando</span>
-                            </div>
-                            <div class="order-time">
-                                <i class="fas fa-clock"></i>
-                                <span>Est. 15 min</span>
-                            </div>
-                        </div>
-                        <div class="order-items">
-                            <div class="order-item">
-                                <span>Sándwich de Pollo</span>
-                                <span>$850</span>
-                            </div>
-                            <div class="order-item">
-                                <span>Ensalada Fresca</span>
-                                <span>$550</span>
-                            </div>
-                            <div class="order-item">
-                                <span>Jugo de Naranja</span>
-                                <span>$300</span>
-                            </div>
-                        </div>
-                        <div class="order-total">
-                            <strong>Total: $1700</strong>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tab-content" id="orderHistory">
-                    <div class="order-card completed">
-                        <div class="order-header">
-                            <div class="order-info">
-                                <h3>Order #ORD-002</h3>
-                                <span class="order-status completed">Completado</span>
-                            </div>
-                            <div class="order-date">
-                                <i class="fas fa-calendar"></i>
-                                <span>Ayer, 12:30 PM</span>
-                            </div>
-                        </div>
-                        <div class="order-items">
-                            <div class="order-item">
-                                <span>Porción de Pizza</span>
-                                <span>$700</span>
-                            </div>
-                            <div class="order-item">
-                                <span>Jugo de Manzana</span>
-                                <span>$250</span>
-                            </div>
-                        </div>
-                        <div class="order-total">
-                            <strong>Total: $950</strong>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>

@@ -31,6 +31,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/views/index.html'));
 });
 
+// Serve dashboard pages
+app.get('/buffet-dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../public/views/buffet-dashboard.html'));
+});
+
+app.get('/admin-dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../public/views/admin-dashboard.html'));
+});
+
 // Payment result pages
 app.get('/payment/success', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/views/payment-success.html'));
