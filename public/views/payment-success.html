@@ -91,9 +91,19 @@
     </style>
 
     <script>
-        // Generate random order details
-        const orderNumber = Math.floor(Math.random() * 9000) + 1000;
-        const estimatedTime = Math.floor(Math.random() * 20) + 10;
+        // # Generar detalles del pedido o recuperar de localStorage
+        // # Esta parte maneja la información del pedido después del pago exitoso
+        let orderNumber = Math.floor(Math.random() * 9000) + 1000;
+        let estimatedTime = Math.floor(Math.random() * 20) + 10;
+        
+        // # Intentar recuperar datos del pedido guardados antes del pago
+        const pendingOrder = localStorage.getItem('pendingOrder');
+        if (pendingOrder) {
+            const orderData = JSON.parse(pendingOrder);
+            console.log('Recovered order data:', orderData);
+            // # Limpiar datos guardados
+            localStorage.removeItem('pendingOrder');
+        }
         
         document.getElementById('orderNumber').textContent = `#${orderNumber}`;
         document.getElementById('estimatedTime').textContent = `${estimatedTime} minutos`;

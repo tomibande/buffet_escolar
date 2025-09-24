@@ -52,6 +52,19 @@ app.get('/payment/failure', (req, res) => {
 app.get('/payment/pending', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/views/payment-pending.html'));
 });
+
+// # Middleware para manejar errores de CORS en webhooks
+app.use('/api/payments/webhook', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

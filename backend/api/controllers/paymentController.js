@@ -2,56 +2,75 @@ const { MercadoPagoConfig, Preference } = require('mercadopago');
 const { v4: uuidv4 } = require('uuid');
 const dataManager = require('../../utils/dataManager');
 
-// Initialize Mercado Pago client with test credentials
+// # Configuración de Mercado Pago con credenciales de prueba
+// # Esta parte inicializa el cliente de Mercado Pago con el token de acceso
 const client = new MercadoPagoConfig({
   accessToken: 'TEST-2429502995306401-092321-44fdc612e60f3dc4014a3c8707d2b0f7-191149729',
   options: {
-    timeout: 5000
+    timeout: 5000,
+    idempotencyKey: 'abc123' // # Clave para evitar pagos duplicados
   }
 });
 
 class PaymentController {
+  // # Método principal para crear una preferencia de pago en Mercado Pago
+  // # Este método recibe los productos del carrito y datos del cliente
   static async createPreference(req, res) {
     try {
       const { items, payer } = req.body;
       
       console.log('Creating preference for:', { items, payer });
       
-      // Create preference
+      // # Crear una nueva instancia de preferencia de Mercado Pago
       const preference = new Preference(client);
       
+      // # Configurar los datos de la preferencia de pago
+      // # Aquí se definen los productos, precios, URLs de retorno, etc.
       const preferenceData = {
+        // # Mapear los productos del carrito al formato de Mercado Pago
         items: items.map(item => ({
           id: item.id.toString(),
           title: item.name,
-          currency_id: 'ARS',
+          currency_id: 'ARS', // # Moneda argentina
           picture_url: item.image,
           description: item.description,
           category_id: 'food',
           quantity: item.quantity,
           unit_price: parseFloat(item.price)
         })),
+        // # Información del comprador
         payer: {
           name: payer.firstName,
           surname: payer.lastName,
           email: payer.email || 'test@test.com'
         },
+        // # URLs donde Mercado Pago redirigirá después del pago
         back_urls: {
           success: `${process.env.BASE_URL || 'http://localhost:3000'}/payment/success`,
           failure: `${process.env.BASE_URL || 'http://localhost:3000'}/payment/failure`,
           pending: `${process.env.BASE_URL || 'http://localhost:3000'}/payment/pending`
         },
-        auto_return: 'approved',
+        auto_return: 'approved', // # Retorno automático cuando el pago es aprobado
         notification_url: `${process.env.BASE_URL || 'http://localhost:3000'}/api/payments/webhook`,
-        statement_descriptor: 'CAFETERIA ESCOLAR',
-        external_reference: uuidv4()
+        statement_descriptor: 'CAFETERIA ESCOLAR', // # Descripción en el resumen de tarjeta
+        external_reference: uuidv4(), // # Referencia única para identificar el pedido
+        // # Configuración adicional para mejorar la experiencia
+        payment_methods: {
+          excluded_payment_methods: [],
+          excluded_payment_types: [],
+          installments: 12 // # Permitir hasta 12 cuotas
+        },
+        shipments: {
+          mode: 'not_specified' // # No hay envío físico
+        }
       };
 
+      // # Crear la preferencia en Mercado Pago
       const response = await preference.create({ body: preferenceData });
       
       console.log('Preference created:', response.id);
       
-      // Store order data for webhook processing
+      // # Guardar los datos del pedido para procesamiento posterior
       const orderData = {
         preferenceId: response.id,
         items,
@@ -60,16 +79,17 @@ class PaymentController {
         timestamp: new Date().toISOString()
       };
       
-      // Store in memory for webhook processing
+      // # Almacenar en memoria para el webhook
       global.pendingOrders = global.pendingOrders || {};
       global.pendingOrders[response.id] = orderData;
       
+      // # Enviar respuesta con los enlaces de pago
       res.json({
         success: true,
         data: {
           preferenceId: response.id,
-          initPoint: response.init_point,
-          sandboxInitPoint: response.sandbox_init_point
+          initPoint: response.init_point, // # URL para producción
+          sandboxInitPoint: response.sandbox_init_point // # URL para pruebas
         }
       });
     } catch (error) {
@@ -82,25 +102,28 @@ class PaymentController {
     }
   }
 
+  // # Webhook para recibir notificaciones de Mercado Pago
+  // # Este método se ejecuta cuando Mercado Pago notifica cambios en el pago
   static async webhook(req, res) {
     try {
       const { type, data } = req.body;
       
       console.log('Webhook received:', { type, data });
       
+      // # Procesar solo notificaciones de pago
       if (type === 'payment') {
-        // Find the order data
+        // # Buscar los datos del pedido pendiente
         const pendingOrders = global.pendingOrders || {};
         let orderData = null;
         
-        // For demo purposes, take the first pending order
+        // # Para demo, tomar el primer pedido pendiente
         for (const [preferenceId, order] of Object.entries(pendingOrders)) {
           orderData = order;
           break;
         }
         
         if (orderData) {
-          // Record the sale
+          // # Registrar la venta en el sistema
           orderData.items.forEach(item => {
             dataManager.addSale({
               productId: item.id,
@@ -109,7 +132,7 @@ class PaymentController {
             });
           });
           
-          // Create order record
+          // # Crear registro del pedido
           const newOrder = dataManager.addOrder({
             items: orderData.items,
             customerName: `${orderData.payer.firstName} ${orderData.payer.lastName}`,
@@ -120,7 +143,7 @@ class PaymentController {
           
           console.log('Order created from webhook:', newOrder);
           
-          // Clean up pending orders
+          // # Limpiar pedidos pendientes
           delete global.pendingOrders[orderData.preferenceId];
         }
       }
@@ -132,13 +155,14 @@ class PaymentController {
     }
   }
 
+  // # Método para crear pedidos de prueba (desarrollo)
   static async createTestOrder(req, res) {
     try {
       const { items, payer } = req.body;
       
       console.log('Creating test order:', { items, payer });
       
-      // Record the sale
+      // # Registrar la venta
       items.forEach(item => {
         dataManager.addSale({
           productId: item.id,
@@ -147,7 +171,7 @@ class PaymentController {
         });
       });
       
-      // Create order record
+      // # Crear registro del pedido
       const newOrder = dataManager.addOrder({
         items,
         customerName: `${payer.firstName} ${payer.lastName}`,
@@ -175,13 +199,14 @@ class PaymentController {
     }
   }
 
+  // # Método para simular pagos (desarrollo)
   static async simulatePayment(req, res) {
     try {
       const { preferenceId } = req.body;
       
       console.log('Simulating payment for preference:', preferenceId);
       
-      // Find the order data
+      // # Buscar los datos del pedido
       const pendingOrders = global.pendingOrders || {};
       const orderData = pendingOrders[preferenceId];
       
@@ -192,7 +217,7 @@ class PaymentController {
         });
       }
       
-      // Record the sale
+      // # Registrar la venta
       orderData.items.forEach(item => {
         dataManager.addSale({
           productId: item.id,
@@ -201,7 +226,7 @@ class PaymentController {
         });
       });
       
-      // Create order record
+      // # Crear registro del pedido
       const newOrder = dataManager.addOrder({
         items: orderData.items,
         customerName: `${orderData.payer.firstName} ${orderData.payer.lastName}`,
@@ -212,7 +237,7 @@ class PaymentController {
       
       console.log('Simulated payment order created:', newOrder);
       
-      // Clean up pending orders
+      // # Limpiar pedidos pendientes
       delete global.pendingOrders[preferenceId];
       
       res.json({

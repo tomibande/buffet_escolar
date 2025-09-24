@@ -358,11 +358,15 @@ class CafeteriaApp {
             return;
         }
 
-        // Show payment modal to collect customer info
+        // # Mostrar modal de pago para recopilar información del cliente
+        // # Esta parte abre el formulario donde el usuario ingresa sus datos
         this.showModal('paymentModal');
     }
 
+    // # Método principal para procesar el pago con Mercado Pago
+    // # Este método se ejecuta cuando el usuario completa sus datos y hace clic en "Continuar al Pago"
     async proceedToPayment() {
+        // # Obtener los datos del formulario del cliente
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         
@@ -371,14 +375,18 @@ class CafeteriaApp {
             return;
         }
 
+        // # Cerrar el modal de información del cliente
         this.closeModal('paymentModal');
         
+        // # Mostrar overlay de carga mientras se procesa
         const loadingOverlay = document.getElementById('loadingOverlay');
         loadingOverlay.classList.add('active');
 
         try {
             console.log('Starting checkout process...');
             
+            // # Crear preferencia de pago en el backend
+            // # Esta llamada envía los productos del carrito y datos del cliente al servidor
             const response = await fetch('/api/payments/create-preference', {
                 method: 'POST',
                 headers: {
@@ -398,60 +406,30 @@ class CafeteriaApp {
             console.log('Preference created:', result);
             
             if (result.success) {
-                // Create Mercado Pago wallet
-                if (this.mp) {
-                    console.log('Creating Mercado Pago wallet...');
-                    loadingOverlay.classList.remove('active');
-                    
-                    const bricks = this.mp.bricks();
-                    
-                    // Clear any existing wallet
-                    const walletContainer = document.getElementById('wallet_container');
-                    walletContainer.innerHTML = '';
-                    walletContainer.style.display = 'block';
-                    
-                    const wallet = await bricks.create("wallet", "wallet_container", {
-                        initialization: {
-                            preferenceId: result.data.preferenceId,
-                        },
-                        callbacks: {
-                            onReady: () => {
-                                console.log('Wallet ready');
-                            },
-                            onSubmit: async (data) => {
-                                console.log('Payment submitted:', data);
-                                // Simulate payment for testing
-                                try {
-                                    const simulateResponse = await fetch('/api/payments/simulate-payment', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                            preferenceId: result.data.preferenceId
-                                        })
-                                    });
-                                    
-                                    const simulateResult = await simulateResponse.json();
-                                    if (simulateResult.success) {
-                                        this.handlePaymentSuccess(firstName, lastName, simulateResult.data);
-                                    }
-                                } catch (error) {
-                                    console.error('Simulation error:', error);
-                                }
-                            },
-                            onError: (error) => {
-                                console.error('Payment error:', error);
-                                // For testing, create order anyway
-                                this.createTestOrder(firstName, lastName);
-                            }
-                        }
-                    });
-                } else {
-                    console.log('Mercado Pago not available, creating test order');
-                    loadingOverlay.classList.remove('active');
-                    this.createTestOrder(firstName, lastName);
-                }
+                // # Redirigir directamente a Mercado Pago
+                // # Esta parte toma la URL de pago y redirige al usuario
+                loadingOverlay.classList.remove('active');
+                
+                // # Usar la URL de sandbox para pruebas o init_point para producción
+                const paymentUrl = result.data.sandboxInitPoint || result.data.initPoint;
+                
+                console.log('Redirecting to Mercado Pago:', paymentUrl);
+                
+                // # Guardar datos del pedido antes de redirigir
+                localStorage.setItem('pendingOrder', JSON.stringify({
+                    preferenceId: result.data.preferenceId,
+                    customerName: `${firstName} ${lastName}`,
+                    items: this.cart,
+                    total: this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                }));
+                
+                // # Limpiar carrito antes de redirigir
+                this.cart = [];
+                this.updateCartDisplay();
+                this.closeCart();
+                
+                // # Redirigir a Mercado Pago
+                window.location.href = paymentUrl;
             } else {
                 throw new Error('Error creating payment preference');
             }
@@ -462,6 +440,7 @@ class CafeteriaApp {
         }
     }
 
+    // # Método para crear pedidos de prueba (desarrollo)
     async createTestOrder(firstName, lastName) {
         try {
             const response = await fetch('/api/payments/create-test-order', {
@@ -485,20 +464,22 @@ class CafeteriaApp {
         }
     }
 
+    // # Método para manejar el éxito del pago
+    // # Esta función se ejecuta cuando el pago se completa exitosamente
     handlePaymentSuccess(firstName, lastName, orderData = null) {
         const orderNumber = orderData ? orderData.orderNumber : Math.floor(Math.random() * 9000) + 1000;
         const estimatedTime = orderData ? orderData.estimatedTime : Math.floor(Math.random() * 20) + 10;
         
-        // Update success modal
+        // # Actualizar modal de éxito con los datos del pedido
         document.getElementById('orderNumber').textContent = `#${orderNumber}`;
         document.getElementById('estimatedTime').textContent = `${estimatedTime} minutos`;
         
-        // Clear cart
+        // # Limpiar carrito y cerrar sidebar
         this.cart = [];
         this.updateCartDisplay();
         this.closeCart();
         
-        // Hide wallet and show success modal
+        // # Ocultar contenedor de wallet y mostrar modal de éxito
         document.getElementById('wallet_container').style.display = 'none';
         this.showModal('orderSuccessModal');
         

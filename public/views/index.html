@@ -185,16 +185,8 @@
     </div>
 
     <!-- Mercado Pago Container -->
-    <div id="wallet_container" style="display: none; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;"></div>
-    
-    <!-- Test Payment Button (for development) -->
-    <div id="test_payment_container" style="display: none; text-align: center; margin: 20px;">
-        <p>Modo de prueba - Mercado Pago</p>
-        <button class="btn btn-primary" onclick="app.createTestOrder(document.getElementById('firstName').value, document.getElementById('lastName').value)">
-            <i class="fas fa-credit-card"></i>
-            Simular Pago (Prueba)
-        </button>
-    </div>
+    <!-- # Contenedor oculto para Mercado Pago (no se usa en redirección directa) -->
+    <div id="wallet_container" style="display: none;"></div>
     
     <script src="../scripts/main.js"></script>
 </body>
