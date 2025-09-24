@@ -65,10 +65,10 @@
     ],
     "customerName": "Pablo Bande",
     "total": 300,
-    "paymentId": null,
+    "paymentId": "CONF-1758752141213",
     "estimatedTime": 16,
-    "paymentStatus": "pending",
+    "paymentStatus": "confirmed",
     "createdAt": "2025-09-24T22:14:59.853Z",
-    "status": "Pendiente de Pago"
+    "status": "Preparando"
   }
 ]
