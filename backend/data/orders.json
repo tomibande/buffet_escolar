@@ -57,5 +57,29 @@
     "paymentStatus": "confirmed",
     "createdAt": "2025-01-24T15:45:00.000Z",
     "status": "Preparando"
+  },
+  {
+    "id": "ORD-1758755234508",
+    "orderNumber": 3309,
+    "items": [
+      {
+        "id": 2,
+        "name": "Ensalada Fresca",
+        "description": "Mezcla de hojas verdes con tomates cherry, pepinos y aderezo",
+        "price": 550,
+        "category": "principal",
+        "image": "https://images.pexels.com/photos/1059905/pexels-photo-1059905.jpeg?auto=compress&cs=tinysrgb&w=400",
+        "available": true,
+        "rating": 4.2,
+        "quantity": 1
+      }
+    ],
+    "customerName": "tomas bande",
+    "total": 550,
+    "paymentId": null,
+    "estimatedTime": 18,
+    "paymentStatus": "pending",
+    "createdAt": "2025-09-24T23:07:14.508Z",
+    "status": "Pendiente de Pago"
   }
 ]
