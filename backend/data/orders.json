@@ -41,10 +41,10 @@
     ],
     "customerName": "Irene Zucchi",
     "total": 850,
-    "paymentId": null,
+    "paymentId": "CONF-1758751088972",
     "estimatedTime": 17,
-    "paymentStatus": "pending",
+    "paymentStatus": "confirmed",
     "createdAt": "2025-09-24T21:04:43.206Z",
-    "status": "Pendiente de Pago"
+    "status": "Preparando"
   }
 ]

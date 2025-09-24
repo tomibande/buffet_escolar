@@ -34,5 +34,11 @@
     "date": "2024-01-15",
     "quantity": 20,
     "revenue": 5000
+  },
+  {
+    "productId": 1,
+    "quantity": 1,
+    "revenue": 850,
+    "date": "2025-09-24"
   }
 ]
