@@ -1,50 +1,56 @@
 [
   {
     "productId": 1,
-    "date": "2024-01-15",
-    "quantity": 25,
-    "revenue": 21250
+    "date": "2025-01-24",
+    "quantity": 12,
+    "revenue": 10200
   },
   {
     "productId": 2,
-    "date": "2024-01-15",
-    "quantity": 15,
-    "revenue": 8250
+    "date": "2025-01-24",
+    "quantity": 8,
+    "revenue": 4400
   },
   {
     "productId": 3,
-    "date": "2024-01-15",
-    "quantity": 30,
-    "revenue": 21000
-  },
-  {
-    "productId": 4,
-    "date": "2024-01-15",
-    "quantity": 40,
-    "revenue": 14000
-  },
-  {
-    "productId": 5,
-    "date": "2024-01-15",
-    "quantity": 35,
+    "date": "2025-01-24",
+    "quantity": 15,
     "revenue": 10500
   },
   {
-    "productId": 6,
-    "date": "2024-01-15",
+    "productId": 4,
+    "date": "2025-01-24",
     "quantity": 20,
-    "revenue": 5000
-  },
-  {
-    "productId": 1,
-    "quantity": 1,
-    "revenue": 850,
-    "date": "2025-09-24"
+    "revenue": 7000
   },
   {
     "productId": 5,
-    "quantity": 1,
-    "revenue": 300,
-    "date": "2025-09-24"
+    "date": "2025-01-24",
+    "quantity": 18,
+    "revenue": 5400
+  },
+  {
+    "productId": 6,
+    "date": "2025-01-24",
+    "quantity": 10,
+    "revenue": 2500
+  },
+  {
+    "productId": 1,
+    "date": "2025-01-23",
+    "quantity": 10,
+    "revenue": 8500
+  },
+  {
+    "productId": 3,
+    "date": "2025-01-23",
+    "quantity": 12,
+    "revenue": 8400
+  },
+  {
+    "productId": 5,
+    "date": "2025-01-23",
+    "quantity": 15,
+    "revenue": 4500
   }
 ]

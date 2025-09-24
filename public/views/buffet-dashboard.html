@@ -274,9 +274,9 @@
                 
                 const actionButton = order.paymentStatus === 'pending' 
                     ? `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="confirmPayment('${order.id}')">
-                         <i class="fas fa-check"></i>
+                         <i class="fas fa-check"></i> Confirmar
                        </button>`
-                    : `<span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>`;
+                    : `<span class="status ${order.status.toLowerCase().replace(/\s+/g, '').replace('ó', 'o')}">${order.status}</span>`;
                 
                 return `
                     <div class="table-row">

@@ -1,29 +1,5 @@
 [
   {
-    "id": "ORD-1758747608636",
-    "orderNumber": 9598,
-    "items": [
-      {
-        "id": 5,
-        "name": "Jugo de Naranja",
-        "description": "Jugo de naranja recién exprimido",
-        "price": 300,
-        "category": "bebida",
-        "image": "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400",
-        "available": true,
-        "rating": 4.1,
-        "quantity": 1
-      }
-    ],
-    "customerName": "bande tomas",
-    "total": 300,
-    "paymentId": null,
-    "estimatedTime": 13,
-    "paymentStatus": "pending",
-    "createdAt": "2025-09-24T21:00:08.636Z",
-    "status": "Pendiente de Pago"
-  },
-  {
     "id": "ORD-1758747883206",
     "orderNumber": 3050,
     "items": [
@@ -39,13 +15,13 @@
         "quantity": 1
       }
     ],
-    "customerName": "Irene Zucchi",
+    "customerName": "María González",
     "total": 850,
     "paymentId": "CONF-1758751088972",
     "estimatedTime": 17,
     "paymentStatus": "confirmed",
-    "createdAt": "2025-09-24T21:04:43.206Z",
-    "status": "Preparando"
+    "createdAt": "2025-01-24T14:30:00.000Z",
+    "status": "Completado"
   },
   {
     "id": "ORD-1758752099853",
@@ -60,15 +36,26 @@
         "image": "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400",
         "available": true,
         "rating": 4.1,
+        "quantity": 2
+      },
+      {
+        "id": 6,
+        "name": "Galleta de Chocolate",
+        "description": "Galleta tibia recién horneada con chips de chocolate",
+        "price": 250,
+        "category": "postre",
+        "image": "https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg?auto=compress&cs=tinysrgb&w=400",
+        "available": true,
+        "rating": 4.8,
         "quantity": 1
       }
     ],
-    "customerName": "Pablo Bande",
-    "total": 300,
+    "customerName": "Carlos Rodríguez",
+    "total": 850,
     "paymentId": "CONF-1758752141213",
-    "estimatedTime": 16,
+    "estimatedTime": 12,
     "paymentStatus": "confirmed",
-    "createdAt": "2025-09-24T22:14:59.853Z",
+    "createdAt": "2025-01-24T15:45:00.000Z",
     "status": "Preparando"
   }
 ]

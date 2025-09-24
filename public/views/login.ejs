@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,9 +72,8 @@
     </div>
 
     <script>
-        // # Agregar efectos visuales al formulario
         document.addEventListener('DOMContentLoaded', function() {
-            // # Efecto de focus en inputs
+            // Focus effects on inputs
             const inputs = document.querySelectorAll('input');
             inputs.forEach(input => {
                 input.addEventListener('focus', function() {
@@ -86,7 +85,7 @@
                 });
             });
             
-            // # Validación en tiempo real
+            // Real-time validation
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
             
@@ -114,7 +113,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // # Mostrar estado de carga
+            // Show loading state
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
@@ -138,14 +137,14 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // # Mostrar éxito
+                    // Show success
                     submitBtn.innerHTML = '<i class="fas fa-check"></i> ¡Éxito!';
                     submitBtn.style.background = '#10b981';
                     
                     localStorage.setItem('token', result.data.token);
                     localStorage.setItem('user', JSON.stringify(result.data.user));
                     
-                    // # Redirigir según el rol del usuario
+                    // Redirect based on user role
                     const userRole = result.data.user.role;
                     setTimeout(() => {
                         if (userRole === 'buffet') {
@@ -157,7 +156,7 @@
                         }
                     }, 1000);
                 } else {
-                    // # Mostrar error
+                    // Show error
                     showError(result.message || 'Error en el inicio de sesión');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
@@ -170,7 +169,7 @@
             }
         });
         
-        // # Función para mostrar errores
+        // Function to show errors
         function showError(message) {
             const errorDiv = document.createElement('div');
             errorDiv.style.cssText = `
@@ -203,7 +202,7 @@
             }, 4000);
         }
         
-        // # Función para mostrar información de contraseña olvidada
+        // Function to show forgot password info
         function showForgotPassword() {
             showError('Contacta al administrador del sistema para recuperar tu contraseña');
         }
@@ -223,7 +222,7 @@
             }
         }
         
-        // # Agregar estilos para las animaciones
+        // Add styles for animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn {
