@@ -21,10 +21,12 @@ class CafeteriaApp {
     }
 
     initializeMercadoPago() {
-        if (typeof MercadoPago !== 'undefined' && window.location.pathname === '/') {
+        // Initialize Mercado Pago when the script loads
+        if (typeof MercadoPago !== 'undefined') {
             this.mp = new MercadoPago('TEST-2429502995306401-092321-8e4364b1e9ee3c0c38c5c0967b0f6365-191149729', {
                 locale: 'es-AR'
             });
+            console.log('Mercado Pago initialized');
         }
     }
 
@@ -375,7 +377,8 @@ class CafeteriaApp {
         loadingOverlay.classList.add('active');
 
         try {
-            // Create Mercado Pago preference
+            console.log('Starting checkout process...');
+            
             const response = await fetch('/api/payments/create-preference', {
                 method: 'POST',
                 headers: {
@@ -392,53 +395,63 @@ class CafeteriaApp {
             });
 
             const result = await response.json();
+            console.log('Preference created:', result);
             
             if (result.success) {
-                loadingOverlay.classList.remove('active');
-                
-                // For testing purposes, create order directly
-                const testOrderResponse = await fetch('/api/payments/create-test-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        items: this.cart,
-                        payer: { firstName, lastName }
-                    })
-                });
-                
-                const testOrderResult = await testOrderResponse.json();
-                
-                if (testOrderResult.success) {
-                    this.handlePaymentSuccess(firstName, lastName, testOrderResult.data);
-                    return;
-                }
-                
-                // If you have real Mercado Pago credentials, uncomment this:
-                /*
                 // Create Mercado Pago wallet
                 if (this.mp) {
+                    console.log('Creating Mercado Pago wallet...');
+                    loadingOverlay.classList.remove('active');
+                    
                     const bricks = this.mp.bricks();
-                    await bricks.create("wallet", "wallet_container", {
+                    
+                    // Clear any existing wallet
+                    const walletContainer = document.getElementById('wallet_container');
+                    walletContainer.innerHTML = '';
+                    walletContainer.style.display = 'block';
+                    
+                    const wallet = await bricks.create("wallet", "wallet_container", {
                         initialization: {
                             preferenceId: result.data.preferenceId,
                         },
                         callbacks: {
                             onReady: () => {
-                                document.getElementById('wallet_container').style.display = 'block';
+                                console.log('Wallet ready');
                             },
-                            onSubmit: (data) => {
-                                this.handlePaymentSuccess(firstName, lastName);
+                            onSubmit: async (data) => {
+                                console.log('Payment submitted:', data);
+                                // Simulate payment for testing
+                                try {
+                                    const simulateResponse = await fetch('/api/payments/simulate-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            preferenceId: result.data.preferenceId
+                                        })
+                                    });
+                                    
+                                    const simulateResult = await simulateResponse.json();
+                                    if (simulateResult.success) {
+                                        this.handlePaymentSuccess(firstName, lastName, simulateResult.data);
+                                    }
+                                } catch (error) {
+                                    console.error('Simulation error:', error);
+                                }
                             },
                             onError: (error) => {
                                 console.error('Payment error:', error);
-                                alert('Error en el pago. Por favor intenta nuevamente.');
+                                // For testing, create order anyway
+                                this.createTestOrder(firstName, lastName);
                             }
                         }
                     });
+                } else {
+                    console.log('Mercado Pago not available, creating test order');
+                    loadingOverlay.classList.remove('active');
+                    this.createTestOrder(firstName, lastName);
                 }
-                */
             } else {
                 throw new Error('Error creating payment preference');
             }
@@ -446,6 +459,29 @@ class CafeteriaApp {
             console.error('Checkout error:', error);
             loadingOverlay.classList.remove('active');
             alert('Ocurrió un error durante el pago. Por favor intenta nuevamente.');
+        }
+    }
+
+    async createTestOrder(firstName, lastName) {
+        try {
+            const response = await fetch('/api/payments/create-test-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    items: this.cart,
+                    payer: { firstName, lastName }
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                this.handlePaymentSuccess(firstName, lastName, result.data);
+            }
+        } catch (error) {
+            console.error('Test order error:', error);
+            alert('Error al crear el pedido de prueba');
         }
     }
 
@@ -465,6 +501,8 @@ class CafeteriaApp {
         // Hide wallet and show success modal
         document.getElementById('wallet_container').style.display = 'none';
         this.showModal('orderSuccessModal');
+        
+        console.log('Payment completed successfully');
     }
 
     showModal(modalId) {
