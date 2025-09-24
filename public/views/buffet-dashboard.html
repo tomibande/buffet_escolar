@@ -401,6 +401,10 @@
         
         // Confirm payment function
         async function confirmPayment(orderId) {
+            if (!confirm('¿Confirmar que el pago ha sido recibido? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
             try {
                 const response = await fetch(`/api/payments/confirm-payment/${orderId}`, {
                     method: 'POST',
@@ -411,7 +415,7 @@
                 
                 const result = await response.json();
                 if (result.success) {
-                    alert('Pago confirmado exitosamente');
+                    showSuccessMessage('Pago confirmado exitosamente. El pedido está listo para preparar.');
                     loadDashboardData(); // Reload data
                 } else {
                     alert(result.message || 'Error al confirmar el pago');
@@ -421,6 +425,67 @@
                 alert('Error al confirmar el pago');
             }
         }
+        
+        // Function to show success messages
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+                font-weight: 500;
+                animation: slideIn 0.3s ease-out;
+                max-width: 400px;
+            `;
+            successDiv.innerHTML = `
+                <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.style.animation = 'slideOut 0.3s ease-in forwards';
+                setTimeout(() => {
+                    if (document.body.contains(successDiv)) {
+                        document.body.removeChild(successDiv);
+                    }
+                }, 300);
+            }, 4000);
+        }
+        
+        // Add styles for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
         
         // Make function globally available
         window.confirmPayment = confirmPayment;

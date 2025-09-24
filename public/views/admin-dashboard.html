@@ -262,14 +262,14 @@
             const recentOrdersSection = document.getElementById('recentOrdersSection');
             const recentOrdersList = document.getElementById('recentOrdersList');
             
-            // # Solo mostrar la sección si hay pedidos
+            // Only show section if there are orders
             if (!orders || orders.length === 0) {
                 recentOrdersSection.style.display = 'none';
                 return;
             }
             
             recentOrdersSection.style.display = 'block';
-            const recentOrders = orders.slice(-10).reverse(); // # Mostrar últimos 10 pedidos
+            const recentOrders = orders.slice(-10).reverse(); // Show last 10 orders
             
             recentOrdersList.innerHTML = recentOrders.map(order => {
                 const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {

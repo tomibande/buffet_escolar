@@ -1908,6 +1908,12 @@ section {
     background-color: rgba(239, 68, 68, 0.1);
     color: var(--error-color);
 }
+
+.status.pendiente {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
 .products-section {
     margin-bottom: var(--spacing-2xl);
 }
