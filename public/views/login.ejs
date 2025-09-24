@@ -7,6 +7,110 @@
     <link rel="stylesheet" href="../styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-page {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: gradientShift 20s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            }
+            25% {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 25%, #4facfe 50%, #00f2fe 75%, #667eea 100%);
+            }
+            50% {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 25%, #667eea 50%, #764ba2 75%, #f093fb 100%);
+            }
+            75% {
+                background: linear-gradient(135deg, #00f2fe 0%, #667eea 25%, #764ba2 50%, #f093fb 75%, #f5576c 100%);
+            }
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 2rem;
+            padding: 3.5rem;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            margin: 0 1rem;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-logo i {
+            font-size: 4.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .auth-logo h1 {
+            font-size: 2.8rem;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            transform: translateY(-3px);
+            background: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.4s ease;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 1.2rem 2.5rem;
+            border-radius: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+        }
+    </style>
 </head>
 <body class="auth-page">
     <div class="auth-container">
@@ -56,64 +160,19 @@
             </form>
             
             <div class="auth-footer">
-                <p style="margin-bottom: 1rem; font-size: 0.875rem; color: #6b7280;">
+                <p style="margin-bottom: 1rem; font-size: 0.95rem; color: #4a5568;">
                     <strong>Credenciales de prueba:</strong><br>
-                    Admin: <code style="background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">admin / admin123</code><br>
-                    Buffet: <code style="background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">buffet / fragata</code>
+                    Admin: <code>admin / admin123</code><br>
+                    Buffet: <code>buffet / fragata</code>
                 </p>
             </div>
-        </div>
-        
-        <div class="auth-background">
-            <div class="bg-shape shape-1"></div>
-            <div class="bg-shape shape-2"></div>
-            <div class="bg-shape shape-3"></div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Focus effects on inputs
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'scale(1.02)';
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'scale(1)';
-                });
-            });
-            
-            // Real-time validation
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            
-            usernameInput.addEventListener('input', function() {
-                if (this.value.length >= 3) {
-                    this.style.borderColor = '#10b981';
-                    this.nextElementSibling.style.color = '#10b981';
-                } else {
-                    this.style.borderColor = '';
-                    this.nextElementSibling.style.color = '';
-                }
-            });
-            
-            passwordInput.addEventListener('input', function() {
-                if (this.value.length >= 6) {
-                    this.style.borderColor = '#10b981';
-                    this.nextElementSibling.style.color = '#10b981';
-                } else {
-                    this.style.borderColor = '';
-                    this.nextElementSibling.style.color = '';
-                }
-            });
-        });
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Show loading state
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
@@ -137,14 +196,12 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Show success
                     submitBtn.innerHTML = '<i class="fas fa-check"></i> ¡Éxito!';
                     submitBtn.style.background = '#10b981';
                     
                     localStorage.setItem('token', result.data.token);
                     localStorage.setItem('user', JSON.stringify(result.data.user));
                     
-                    // Redirect based on user role
                     const userRole = result.data.user.role;
                     setTimeout(() => {
                         if (userRole === 'buffet') {
@@ -156,7 +213,6 @@
                         }
                     }, 1000);
                 } else {
-                    // Show error
                     showError(result.message || 'Error en el inicio de sesión');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
@@ -169,7 +225,6 @@
             }
         });
         
-        // Function to show errors
         function showError(message) {
             const errorDiv = document.createElement('div');
             errorDiv.style.cssText = `
@@ -183,26 +238,18 @@
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                 z-index: 9999;
                 font-weight: 500;
-                animation: slideIn 0.3s ease-out;
             `;
-            errorDiv.innerHTML = `
-                <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i>
-                ${message}
-            `;
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i>${message}`;
             
             document.body.appendChild(errorDiv);
             
             setTimeout(() => {
-                errorDiv.style.animation = 'slideOut 0.3s ease-in forwards';
-                setTimeout(() => {
-                    if (document.body.contains(errorDiv)) {
-                        document.body.removeChild(errorDiv);
-                    }
-                }, 300);
+                if (document.body.contains(errorDiv)) {
+                    document.body.removeChild(errorDiv);
+                }
             }, 4000);
         }
         
-        // Function to show forgot password info
         function showForgotPassword() {
             showError('Contacta al administrador del sistema para recuperar tu contraseña');
         }
@@ -221,33 +268,6 @@
                 icon.classList.add('fa-eye');
             }
         }
-        
-        // Add styles for animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
