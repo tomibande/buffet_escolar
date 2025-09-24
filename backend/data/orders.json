@@ -76,11 +76,11 @@
     ],
     "customerName": "tomas bande",
     "total": 550,
-    "paymentId": null,
+    "paymentId": "CONF-1758755348162",
     "estimatedTime": 18,
-    "paymentStatus": "pending",
+    "paymentStatus": "confirmed",
     "createdAt": "2025-09-24T23:07:14.508Z",
-    "status": "Pendiente de Pago"
+    "status": "Preparando"
   },
   {
     "id": "ORD-1758755248186",
