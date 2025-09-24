@@ -200,13 +200,19 @@
                 
                 const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
                 
+                const actionButton = order.paymentStatus === 'pending' 
+                    ? `<button class="btn btn-sm" style="background: #10b981; color: white;" onclick="confirmPayment('${order.id}')">
+                         <i class="fas fa-check"></i>
+                       </button>`
+                    : `<span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>`;
+                
                 return `
                     <div class="table-row">
                         <span>#${order.orderNumber}</span>
                         <span>${order.customerName}</span>
                         <span>${itemsText}</span>
                         <span>$${order.total}</span>
-                        <span class="status ${order.status.toLowerCase()}">${order.status}</span>
+                        <span>${actionButton}</span>
                         <span>${orderTime}</span>
                     </div>
                 `;
@@ -274,6 +280,32 @@
 
         // Load data on page load
         loadDashboardData();
+        
+        // Confirm payment function
+        async function confirmPayment(orderId) {
+            try {
+                const response = await fetch(`/api/payments/confirm-payment/${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Pago confirmado exitosamente');
+                    loadDashboardData(); // Reload data
+                } else {
+                    alert(result.message || 'Error al confirmar el pago');
+                }
+            } catch (error) {
+                console.error('Error confirming payment:', error);
+                alert('Error al confirmar el pago');
+            }
+        }
+        
+        // Make function globally available
+        window.confirmPayment = confirmPayment;
     </script>
 </body>
 </html>

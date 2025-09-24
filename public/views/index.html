@@ -30,7 +30,6 @@
                     <div class="dropdown-menu" id="userDropdown">
                         <a href="#profile"><i class="fas fa-user"></i> Perfil</a>
                         <a href="#settings"><i class="fas fa-cog"></i> Configuración</a>
-                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
                     </div>
                 </div>
                 <button class="mobile-toggle" id="mobileToggle">
@@ -154,39 +153,64 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="payCash()">
+                    <i class="fas fa-money-bill"></i>
+                    Pagar en Efectivo
+                </button>
                 <button class="btn btn-secondary" onclick="closeModal('paymentModal')">
                     Cancelar
                 </button>
-                <button class="btn btn-primary" onclick="proceedToPayment()">
-                    Continuar al Pago
+                <button class="btn btn-primary" onclick="payWithMercadoPago()">
+                    <i class="fas fa-credit-card"></i>
+                    Pagar con Mercado Pago
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Order Success Modal -->
-    <div class="modal" id="orderSuccessModal">
+    <!-- Cash Payment Modal -->
+    <div class="modal" id="cashPaymentModal">
         <div class="modal-content">
             <div class="modal-header">
-                <i class="fas fa-check-circle success-icon"></i>
-                <h3>¡Pedido Realizado con Éxito!</h3>
+                <i class="fas fa-money-bill success-icon"></i>
+                <h3>Pago en Efectivo</h3>
             </div>
             <div class="modal-body">
-                <p>Tu pedido ha sido procesado y está siendo preparado.</p>
-                <p>Número de pedido: <strong id="orderNumber">#1234</strong></p>
-                <p>Tiempo estimado: <strong id="estimatedTime">15-20 minutos</strong></p>
+                <p>Paga y ordena en persona en el mostrador de la izquierda</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('orderSuccessModal')">
-                    Continuar
+                <button class="btn btn-primary" onclick="closeModal('cashPaymentModal')">
+                    OK
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Mercado Pago Container -->
-    <!-- # Contenedor oculto para Mercado Pago (no se usa en redirección directa) -->
-    <div id="wallet_container" style="display: none;"></div>
+    <!-- Mercado Pago Modal -->
+    <div class="modal" id="mercadoPagoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-credit-card success-icon"></i>
+                <h3>Pagar con Mercado Pago</h3>
+            </div>
+            <div class="modal-body">
+                <p>Para completar tu pago, accede al siguiente enlace:</p>
+                <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; text-align: center;">
+                    <a href="https://link.mercadopago.com.ar/buffetescolar" target="_blank" class="btn btn-primary" style="margin: 0;">
+                        <i class="fas fa-external-link-alt"></i>
+                        link.mercadopago.com.ar/buffetescolar
+                    </a>
+                </div>
+                <p style="font-size: 0.875rem; color: #6b7280;">Una vez que completes el pago, tu pedido aparecerá en el sistema del buffet para su preparación.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('mercadoPagoModal')">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
     
     <script src="../scripts/main.js"></script>
 </body>

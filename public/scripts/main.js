@@ -358,15 +358,18 @@ class CafeteriaApp {
             return;
         }
 
-        // # Mostrar modal de pago para recopilar información del cliente
-        // # Esta parte abre el formulario donde el usuario ingresa sus datos
+        // Show payment modal to collect customer information
         this.showModal('paymentModal');
     }
 
-    // # Método principal para procesar el pago con Mercado Pago
-    // # Este método se ejecuta cuando el usuario completa sus datos y hace clic en "Continuar al Pago"
-    async proceedToPayment() {
-        // # Obtener los datos del formulario del cliente
+    // Handle cash payment option
+    payCash() {
+        this.closeModal('paymentModal');
+        this.showModal('cashPaymentModal');
+    }
+
+    // Handle Mercado Pago payment option
+    payWithMercadoPago() {
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         
@@ -375,115 +378,8 @@ class CafeteriaApp {
             return;
         }
 
-        // # Cerrar el modal de información del cliente
         this.closeModal('paymentModal');
-        
-        // # Mostrar overlay de carga mientras se procesa
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.classList.add('active');
-
-        try {
-            console.log('Starting checkout process...');
-            
-            // # Crear preferencia de pago en el backend
-            // # Esta llamada envía los productos del carrito y datos del cliente al servidor
-            const response = await fetch('/api/payments/create-preference', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    items: this.cart,
-                    payer: {
-                        firstName,
-                        lastName,
-                        email: 'test@test.com'
-                    }
-                })
-            });
-
-            const result = await response.json();
-            console.log('Preference created:', result);
-            
-            if (result.success) {
-                // # Redirigir directamente a Mercado Pago
-                // # Esta parte toma la URL de pago y redirige al usuario
-                loadingOverlay.classList.remove('active');
-                
-                // # Usar la URL de sandbox para pruebas o init_point para producción
-                const paymentUrl = result.data.sandboxInitPoint || result.data.initPoint;
-                
-                console.log('Redirecting to Mercado Pago:', paymentUrl);
-                
-                // # Guardar datos del pedido antes de redirigir
-                localStorage.setItem('pendingOrder', JSON.stringify({
-                    preferenceId: result.data.preferenceId,
-                    customerName: `${firstName} ${lastName}`,
-                    items: this.cart,
-                    total: this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-                }));
-                
-                // # Limpiar carrito antes de redirigir
-                this.cart = [];
-                this.updateCartDisplay();
-                this.closeCart();
-                
-                // # Redirigir a Mercado Pago
-                window.location.href = paymentUrl;
-            } else {
-                throw new Error('Error creating payment preference');
-            }
-        } catch (error) {
-            console.error('Checkout error:', error);
-            loadingOverlay.classList.remove('active');
-            alert('Ocurrió un error durante el pago. Por favor intenta nuevamente.');
-        }
-    }
-
-    // # Método para crear pedidos de prueba (desarrollo)
-    async createTestOrder(firstName, lastName) {
-        try {
-            const response = await fetch('/api/payments/create-test-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    items: this.cart,
-                    payer: { firstName, lastName }
-                })
-            });
-            
-            const result = await response.json();
-            if (result.success) {
-                this.handlePaymentSuccess(firstName, lastName, result.data);
-            }
-        } catch (error) {
-            console.error('Test order error:', error);
-            alert('Error al crear el pedido de prueba');
-        }
-    }
-
-    // # Método para manejar el éxito del pago
-    // # Esta función se ejecuta cuando el pago se completa exitosamente
-    handlePaymentSuccess(firstName, lastName, orderData = null) {
-        const orderNumber = orderData ? orderData.orderNumber : Math.floor(Math.random() * 9000) + 1000;
-        const estimatedTime = orderData ? orderData.estimatedTime : Math.floor(Math.random() * 20) + 10;
-        
-        // # Actualizar modal de éxito con los datos del pedido
-        document.getElementById('orderNumber').textContent = `#${orderNumber}`;
-        document.getElementById('estimatedTime').textContent = `${estimatedTime} minutos`;
-        
-        // # Limpiar carrito y cerrar sidebar
-        this.cart = [];
-        this.updateCartDisplay();
-        this.closeCart();
-        
-        // # Ocultar contenedor de wallet y mostrar modal de éxito
-        document.getElementById('wallet_container').style.display = 'none';
-        this.showModal('orderSuccessModal');
-        
-        console.log('Payment completed successfully');
+        this.showModal('mercadoPagoModal');
     }
 
     showModal(modalId) {
@@ -495,12 +391,6 @@ class CafeteriaApp {
         const modal = document.getElementById(modalId);
         modal.classList.remove('active');
     }
-
-    logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/api/auth/login';
-    }
 }
 
 // Global functions
@@ -508,8 +398,12 @@ window.closeModal = (modalId) => {
     app.closeModal(modalId);
 };
 
-window.proceedToPayment = () => {
-    app.proceedToPayment();
+window.payCash = () => {
+    app.payCash();
+};
+
+window.payWithMercadoPago = () => {
+    app.payWithMercadoPago();
 };
 
 // Initialize app when DOM is loaded

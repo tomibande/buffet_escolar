@@ -116,7 +116,7 @@ class DataManager {
       orderNumber: Math.floor(Math.random() * 9000) + 1000,
       ...orderData,
       createdAt: new Date().toISOString(),
-      status: 'Preparando'
+      status: orderData.paymentStatus === 'pending' ? 'Pendiente de Pago' : 'Preparando'
     };
     orders.push(newOrder);
     this.saveOrders(orders);
