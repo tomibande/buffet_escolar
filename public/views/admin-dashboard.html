@@ -46,7 +46,7 @@
                 <div class="stat-content">
                     <h3>Ingresos Totales</h3>
                     <div class="stat-value" id="totalRevenue">$0</div>
-                    <p class="stat-change positive">+12% desde ayer</p>
+                    <p class="stat-change">Desde el inicio</p>
                 </div>
             </div>
             
@@ -57,7 +57,7 @@
                 <div class="stat-content">
                     <h3>Pedidos Hoy</h3>
                     <div class="stat-value" id="todayOrders">0</div>
-                    <p class="stat-change positive">+8% desde ayer</p>
+                    <p class="stat-change">Total del día</p>
                 </div>
             </div>
             
@@ -68,7 +68,7 @@
                 <div class="stat-content">
                     <h3>Producto Más Vendido</h3>
                     <div class="stat-value" id="topProduct">-</div>
-                    <p class="stat-change">Hoy</p>
+                    <p class="stat-change">Histórico</p>
                 </div>
             </div>
             
@@ -86,34 +86,6 @@
 
         <!-- Charts Section -->
         <div class="charts-section">
-            <div class="chart-card">
-                <h3>Ventas por Día</h3>
-                <div class="sales-chart">
-                    <div class="chart-container">
-                        <div class="chart-bar" style="height: 60%" data-value="$1200">
-                            <span class="bar-value">$1200</span>
-                            <span class="bar-label">Lun</span>
-                        </div>
-                        <div class="chart-bar" style="height: 80%" data-value="$1600">
-                            <span class="bar-value">$1600</span>
-                            <span class="bar-label">Mar</span>
-                        </div>
-                        <div class="chart-bar" style="height: 45%" data-value="$900">
-                            <span class="bar-value">$900</span>
-                            <span class="bar-label">Mié</span>
-                        </div>
-                        <div class="chart-bar" style="height: 90%" data-value="$1800">
-                            <span class="bar-value">$1800</span>
-                            <span class="bar-label">Jue</span>
-                        </div>
-                        <div class="chart-bar" style="height: 100%" data-value="$2000">
-                            <span class="bar-value">$2000</span>
-                            <span class="bar-label">Vie</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="chart-card">
                 <h3>Productos Más Vendidos</h3>
                 <div class="top-products" id="topProductsList">
@@ -272,25 +244,39 @@
             // Update total revenue
             document.getElementById('totalRevenue').textContent = `$${data.totalRevenue}`;
             
-            // Update today's orders (mock data)
-            document.getElementById('todayOrders').textContent = '47';
+            // Update today's orders
+            document.getElementById('todayOrders').textContent = '0';
             
             // Update top product
             if (data.topProducts.length > 0) {
                 document.getElementById('topProduct').textContent = data.topProducts[0].productName;
+            } else {
+                document.getElementById('topProduct').textContent = 'Ninguno';
             }
             
             // Update top products list
             const topProductsList = document.getElementById('topProductsList');
-            topProductsList.innerHTML = data.topProducts.map((product, index) => `
-                <div class="product-item">
-                    <div class="product-rank">${index + 1}</div>
-                    <div class="product-info">
-                        <h4>${product.productName}</h4>
-                        <p>${product.quantity} vendidos - $${product.revenue}</p>
+            
+            if (data.topProducts.length === 0) {
+                topProductsList.innerHTML = `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <h4>No hay ventas registradas</h4>
+                            <p>Los productos más vendidos aparecerán aquí</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            } else {
+                topProductsList.innerHTML = data.topProducts.map((product, index) => `
+                    <div class="product-item">
+                        <div class="product-rank">${index + 1}</div>
+                        <div class="product-info">
+                            <h4>${product.productName}</h4>
+                            <p>${product.quantity} vendidos - $${product.revenue}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         function updateRecentOrders(orders) {

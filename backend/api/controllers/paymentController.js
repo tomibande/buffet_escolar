@@ -52,6 +52,11 @@ class PaymentController {
       if (orderIndex === -1) {
         return res.status(404).json({
           success: false,
+        
+        // Show success message
+        setTimeout(() => {
+          alert('¡Pedido creado exitosamente! El personal del buffet debe confirmar tu pago antes de preparar tu pedido.');
+        }, 500);
           message: 'Pedido no encontrado'
         });
       }
