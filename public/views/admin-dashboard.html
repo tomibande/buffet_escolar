@@ -37,6 +37,91 @@
             <p>Gestiona productos y precios de la cafetería</p>
         </div>
 
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Ingresos Totales</h3>
+                    <div class="stat-value" id="totalRevenue">$0</div>
+                    <p class="stat-change positive">+12% desde ayer</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Pedidos Hoy</h3>
+                    <div class="stat-value" id="todayOrders">0</div>
+                    <p class="stat-change positive">+8% desde ayer</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Producto Más Vendido</h3>
+                    <div class="stat-value" id="topProduct">-</div>
+                    <p class="stat-change">Hoy</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Productos</h3>
+                    <div class="stat-value" id="totalProducts">0</div>
+                    <p class="stat-change">En el menú</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>Ventas por Día</h3>
+                <div class="sales-chart">
+                    <div class="chart-container">
+                        <div class="chart-bar" style="height: 60%" data-value="$1200">
+                            <span class="bar-value">$1200</span>
+                            <span class="bar-label">Lun</span>
+                        </div>
+                        <div class="chart-bar" style="height: 80%" data-value="$1600">
+                            <span class="bar-value">$1600</span>
+                            <span class="bar-label">Mar</span>
+                        </div>
+                        <div class="chart-bar" style="height: 45%" data-value="$900">
+                            <span class="bar-value">$900</span>
+                            <span class="bar-label">Mié</span>
+                        </div>
+                        <div class="chart-bar" style="height: 90%" data-value="$1800">
+                            <span class="bar-value">$1800</span>
+                            <span class="bar-label">Jue</span>
+                        </div>
+                        <div class="chart-bar" style="height: 100%" data-value="$2000">
+                            <span class="bar-value">$2000</span>
+                            <span class="bar-label">Vie</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Productos Más Vendidos</h3>
+                <div class="top-products" id="topProductsList">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="action-buttons">
             <button class="btn btn-primary" onclick="showAddProductModal()">
@@ -50,6 +135,24 @@
             <h3>Gestión de Productos</h3>
             <div class="products-grid" id="productsGrid">
                 <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="recent-orders">
+            <h3>Pedidos Recientes</h3>
+            <div class="orders-table">
+                <div class="table-header">
+                    <span>Pedido</span>
+                    <span>Cliente</span>
+                    <span>Productos</span>
+                    <span>Total</span>
+                    <span>Estado</span>
+                    <span>Hora</span>
+                </div>
+                <div class="table-body" id="recentOrdersList">
+                    <!-- Will be populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -122,18 +225,106 @@
         let products = [];
         let editingProductId = null;
 
-        // Load products
-        async function loadProducts() {
+        // Load dashboard data
+        async function loadDashboardData() {
             try {
-                const response = await fetch('/api/products');
-                const result = await response.json();
-                if (result.success) {
-                    products = result.data;
+                const [productsResponse, statsResponse, ordersResponse] = await Promise.all([
+                    fetch('/api/products'),
+                    fetch('/api/products/sales-stats', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }),
+                    fetch('/api/products/orders', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                ]);
+                
+                const productsResult = await productsResponse.json();
+                const statsResult = await statsResponse.json();
+                const ordersResult = await ordersResponse.json();
+                
+                if (productsResult.success) {
+                    products = productsResult.data;
                     renderProducts();
+                    updateProductStats(productsResult.data);
+                }
+                
+                if (statsResult.success) {
+                    updateDashboard(statsResult.data);
+                }
+                
+                if (ordersResult.success) {
+                    updateRecentOrders(ordersResult.data);
                 }
             } catch (error) {
-                console.error('Error loading products:', error);
+                console.error('Error loading dashboard data:', error);
             }
+        }
+
+        function updateProductStats(products) {
+            document.getElementById('totalProducts').textContent = products.length;
+        }
+
+        function updateDashboard(data) {
+            // Update total revenue
+            document.getElementById('totalRevenue').textContent = `$${data.totalRevenue}`;
+            
+            // Update today's orders (mock data)
+            document.getElementById('todayOrders').textContent = '47';
+            
+            // Update top product
+            if (data.topProducts.length > 0) {
+                document.getElementById('topProduct').textContent = data.topProducts[0].productName;
+            }
+            
+            // Update top products list
+            const topProductsList = document.getElementById('topProductsList');
+            topProductsList.innerHTML = data.topProducts.map((product, index) => `
+                <div class="product-item">
+                    <div class="product-rank">${index + 1}</div>
+                    <div class="product-info">
+                        <h4>${product.productName}</h4>
+                        <p>${product.quantity} vendidos - $${product.revenue}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecentOrders(orders) {
+            const recentOrdersList = document.getElementById('recentOrdersList');
+            const recentOrders = orders.slice(-10).reverse(); // Show last 10 orders
+            
+            if (recentOrders.length === 0) {
+                recentOrdersList.innerHTML = `
+                    <div class="table-row">
+                        <span colspan="6" style="text-align: center; color: #6b7280;">No hay pedidos recientes</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentOrdersList.innerHTML = recentOrders.map(order => {
+                const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                
+                return `
+                    <div class="table-row">
+                        <span>#${order.orderNumber}</span>
+                        <span>${order.customerName}</span>
+                        <span>${itemsText}</span>
+                        <span>$${order.total}</span>
+                        <span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>
+                        <span>${orderTime}</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderProducts() {
@@ -214,7 +405,7 @@
                 const result = await response.json();
                 if (result.success) {
                     closeModal('productModal');
-                    loadProducts();
+                    loadDashboardData();
                     alert(result.message);
                 } else {
                     alert(result.message || 'Error al guardar el producto');
@@ -237,7 +428,7 @@
 
                     const result = await response.json();
                     if (result.success) {
-                        loadProducts();
+                        loadDashboardData();
                         alert(result.message);
                     } else {
                         alert(result.message || 'Error al eliminar el producto');
@@ -266,8 +457,8 @@
             document.getElementById('userDropdown').classList.toggle('active');
         });
 
-        // Load products on page load
-        loadProducts();
+        // Load dashboard data on page load
+        loadDashboardData();
     </script>
 </body>
 </html>

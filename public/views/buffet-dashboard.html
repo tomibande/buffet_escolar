@@ -41,34 +41,34 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>Ingresos Totales</h3>
-                    <div class="stat-value" id="totalRevenue">$0</div>
-                    <p class="stat-change positive">+12% desde ayer</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
                 <div class="stat-content">
-                    <h3>Pedidos Hoy</h3>
-                    <div class="stat-value" id="todayOrders">0</div>
-                    <p class="stat-change positive">+8% desde ayer</p>
+                    <h3>Pedidos Pendientes</h3>
+                    <div class="stat-value" id="pendingOrders">0</div>
+                    <p class="stat-change">Esperando confirmación</p>
                 </div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-star"></i>
+                    <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <h3>Producto Más Vendido</h3>
-                    <div class="stat-value" id="topProduct">-</div>
-                    <p class="stat-change">Hoy</p>
+                    <h3>Pedidos Confirmados</h3>
+                    <div class="stat-value" id="confirmedOrders">0</div>
+                    <p class="stat-change positive">Listos para preparar</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Productos</h3>
+                    <div class="stat-value" id="totalProducts">0</div>
+                    <p class="stat-change">En el menú</p>
                 </div>
             </div>
             
@@ -84,41 +84,23 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="charts-section">
-            <div class="chart-card">
-                <h3>Ventas por Día</h3>
-                <div class="sales-chart">
-                    <div class="chart-container">
-                        <div class="chart-bar" style="height: 60%" data-value="$1200">
-                            <span class="bar-value">$1200</span>
-                            <span class="bar-label">Lun</span>
-                        </div>
-                        <div class="chart-bar" style="height: 80%" data-value="$1600">
-                            <span class="bar-value">$1600</span>
-                            <span class="bar-label">Mar</span>
-                        </div>
-                        <div class="chart-bar" style="height: 45%" data-value="$900">
-                            <span class="bar-value">$900</span>
-                            <span class="bar-label">Mié</span>
-                        </div>
-                        <div class="chart-bar" style="height: 90%" data-value="$1800">
-                            <span class="bar-value">$1800</span>
-                            <span class="bar-label">Jue</span>
-                        </div>
-                        <div class="chart-bar" style="height: 100%" data-value="$2000">
-                            <span class="bar-value">$2000</span>
-                            <span class="bar-label">Vie</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="showAddProductModal()">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+            <button class="btn btn-secondary" onclick="refreshOrders()">
+                <i class="fas fa-sync-alt"></i>
+                Actualizar Pedidos
+            </button>
+        </div>
 
-            <div class="chart-card">
-                <h3>Productos Más Vendidos</h3>
-                <div class="top-products" id="topProductsList">
-                    <!-- Will be populated by JavaScript -->
-                </div>
+        <!-- Products Management -->
+        <div class="products-section">
+            <h3>Gestión de Productos</h3>
+            <div class="products-grid" id="productsGrid">
+                <!-- Will be populated by JavaScript -->
             </div>
         </div>
 
@@ -141,6 +123,64 @@
         </div>
     </div>
 
+    <!-- Add/Edit Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <i class="fas fa-utensils"></i>
+                <h3 id="modalTitle">Agregar Producto</h3>
+                <button class="modal-close" onclick="closeModal('productModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productName">Nombre del Producto</label>
+                            <input type="text" id="productName" name="name" required placeholder="Ej: Sándwich de Pollo">
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Precio ($)</label>
+                            <input type="number" id="productPrice" name="price" required placeholder="850" min="0" step="1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productDescription">Descripción</label>
+                        <textarea id="productDescription" name="description" required placeholder="Descripción del producto"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productCategory">Categoría</label>
+                            <select id="productCategory" name="category" required>
+                                <option value="">Seleccionar categoría</option>
+                                <option value="principal">Plato Principal</option>
+                                <option value="acompañamiento">Acompañamiento</option>
+                                <option value="bebida">Bebida</option>
+                                <option value="postre">Postre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="productImage">URL de Imagen</label>
+                            <input type="url" id="productImage" name="image" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('productModal')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="saveProduct()">
+                    <i class="fas fa-save"></i>
+                    Guardar Producto
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Check authentication
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -148,15 +188,14 @@
             window.location.href = '/api/auth/login';
         }
 
+        let products = [];
+        let editingProductId = null;
+
         // Load dashboard data
         async function loadDashboardData() {
             try {
-                const [statsResponse, ordersResponse] = await Promise.all([
-                    fetch('/api/products/sales-stats', {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    }),
+                const [productsResponse, ordersResponse] = await Promise.all([
+                    fetch('/api/products'),
                     fetch('/api/products/orders', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -164,19 +203,63 @@
                     })
                 ]);
                 
-                const statsResult = await statsResponse.json();
+                const productsResult = await productsResponse.json();
                 const ordersResult = await ordersResponse.json();
                 
-                if (statsResult.success) {
-                    updateDashboard(statsResult.data);
+                if (productsResult.success) {
+                    products = productsResult.data;
+                    renderProducts();
+                    updateStats(productsResult.data);
                 }
                 
                 if (ordersResult.success) {
                     updateRecentOrders(ordersResult.data);
+                    updateOrderStats(ordersResult.data);
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
+        }
+
+        function updateStats(products) {
+            document.getElementById('totalProducts').textContent = products.length;
+        }
+
+        function updateOrderStats(orders) {
+            const pendingOrders = orders.filter(order => order.paymentStatus === 'pending').length;
+            const confirmedOrders = orders.filter(order => order.paymentStatus === 'confirmed').length;
+            
+            document.getElementById('pendingOrders').textContent = pendingOrders;
+            document.getElementById('confirmedOrders').textContent = confirmedOrders;
+        }
+
+        function renderProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Sin+Imagen'">
+                    </div>
+                    <div class="product-info">
+                        <h4>${product.name}</h4>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-details">
+                            <span class="product-price">$${product.price}</span>
+                            <span class="product-category">${product.category}</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function updateRecentOrders(orders) {
@@ -219,50 +302,96 @@
             }).join('');
         }
 
-        function loadDashboardDataOld() {
-            try {
-                const response = fetch('/api/products/sales-stats', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                const result = await response.json();
-                if (result.success) {
-                    updateDashboard(result.data);
-                }
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
+        function showAddProductModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Agregar Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                editingProductId = productId;
+                document.getElementById('modalTitle').textContent = 'Editar Producto';
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productImage').value = product.image;
+                document.getElementById('productModal').classList.add('active');
             }
         }
 
-        function updateDashboard(data) {
-            // Update total revenue
-            document.getElementById('totalRevenue').textContent = `$${data.totalRevenue}`;
-            
-            // Update today's orders (mock data)
-            document.getElementById('todayOrders').textContent = '47';
-            
-            // Update top product
-            if (data.topProducts.length > 0) {
-                document.getElementById('topProduct').textContent = data.topProducts[0].productName;
+        async function saveProduct() {
+            const formData = new FormData(document.getElementById('productForm'));
+            const productData = {
+                name: formData.get('name'),
+                price: parseInt(formData.get('price')),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                image: formData.get('image') || 'https://via.placeholder.com/200x150?text=Sin+Imagen'
+            };
+
+            try {
+                const url = editingProductId 
+                    ? `/api/products/${editingProductId}` 
+                    : '/api/products';
+                const method = editingProductId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    closeModal('productModal');
+                    loadDashboardData();
+                    alert(result.message);
+                } else {
+                    alert(result.message || 'Error al guardar el producto');
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert('Error al guardar el producto');
             }
-            
-            // Update top products list
-            const topProductsList = document.getElementById('topProductsList');
-            topProductsList.innerHTML = data.topProducts.map((product, index) => `
-                <div class="product-item">
-                    <div class="product-rank">${index + 1}</div>
-                    <div class="product-info">
-                        <h4>${product.productName}</h4>
-                        <p>${product.quantity} vendidos - $${product.revenue}</p>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Update recent orders (mock data)
-            const recentOrdersList = document.getElementById('recentOrdersList');
-            // This will be updated by updateRecentOrders function
+        }
+
+        async function deleteProduct(productId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                try {
+                    const response = await fetch(`/api/products/${productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        loadDashboardData();
+                        alert(result.message);
+                    } else {
+                        alert(result.message || 'Error al eliminar el producto');
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    alert('Error al eliminar el producto');
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function refreshOrders() {
+            loadDashboardData();
         }
 
         // Logout functionality
@@ -306,6 +435,12 @@
         
         // Make function globally available
         window.confirmPayment = confirmPayment;
+        window.showAddProductModal = showAddProductModal;
+        window.editProduct = editProduct;
+        window.saveProduct = saveProduct;
+        window.deleteProduct = deleteProduct;
+        window.closeModal = closeModal;
+        window.refreshOrders = refreshOrders;
     </script>
 </body>
 </html>

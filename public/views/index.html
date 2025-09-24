@@ -45,21 +45,21 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title">
-                    Bienvenido a Nuestra
+                    Descubre Nuestra
                     <span class="gradient-text">Cafetería Escolar</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Comidas frescas y deliciosas preparadas diariamente para nuestra comunidad escolar.
-                    ¡Ordena con anticipación, evita las filas y disfruta de tus comidas favoritas!
+                    Sabores auténticos y ingredientes frescos en cada bocado. Ordena fácilmente desde tu dispositivo 
+                    y disfruta de una experiencia gastronómica única en tu escuela.
                 </p>
                 <div class="hero-actions">
                     <button class="btn btn-primary" onclick="scrollToSection('menu')">
                         <i class="fas fa-utensils"></i>
-                        Ver Menú
+                        Explorar Menú
                     </button>
                     <button class="btn btn-secondary" onclick="scrollToSection('orders')">
                         <i class="fas fa-shopping-cart"></i>
-                        Ver Carrito
+                        Mi Carrito
                     </button>
                 </div>
             </div>
@@ -74,12 +74,56 @@
         </div>
     </section>
 
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">¿Por qué elegir nuestra cafetería?</h2>
+                <p class="section-subtitle">Experiencia gastronómica diseñada para estudiantes</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Pedidos Rápidos</h3>
+                    <p>Evita las filas largas ordenando con anticipación. Tu comida estará lista cuando llegues.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Ingredientes Frescos</h3>
+                    <p>Utilizamos ingredientes locales y frescos para garantizar la mejor calidad en cada plato.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Comida Saludable</h3>
+                    <p>Opciones nutritivas y balanceadas pensadas especialmente para estudiantes activos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Fácil de Usar</h3>
+                    <p>Interfaz intuitiva que te permite ordenar desde cualquier dispositivo en segundos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Menu Section -->
     <section id="menu" class="menu-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Menú de Hoy</h2>
-                <p class="section-subtitle">Ingredientes frescos, preparados con cuidado</p>
+                <h2 class="section-title">Nuestro Delicioso Menú</h2>
+                <p class="section-subtitle">Cada plato preparado con amor y los mejores ingredientes</p>
             </div>
             
             <div class="menu-filters">
@@ -112,8 +156,8 @@
                 <strong>Total: $<span id="cartTotal">0</span></strong>
             </div>
             <button class="btn btn-primary btn-full" id="checkoutBtn">
-                <i class="fas fa-shopping-cart"></i>
-                Pagar con Mercado Pago
+                <i class="fas fa-credit-card"></i>
+                Proceder al Pago
             </button>
         </div>
     </div>
