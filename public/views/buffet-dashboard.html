@@ -151,7 +151,71 @@
         // Load dashboard data
         async function loadDashboardData() {
             try {
-                const response = await fetch('/api/products/sales-stats', {
+                const [statsResponse, ordersResponse] = await Promise.all([
+                    fetch('/api/products/sales-stats', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }),
+                    fetch('/api/products/orders', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                ]);
+                
+                const statsResult = await statsResponse.json();
+                const ordersResult = await ordersResponse.json();
+                
+                if (statsResult.success) {
+                    updateDashboard(statsResult.data);
+                }
+                
+                if (ordersResult.success) {
+                    updateRecentOrders(ordersResult.data);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateRecentOrders(orders) {
+            const recentOrdersList = document.getElementById('recentOrdersList');
+            const recentOrders = orders.slice(-10).reverse(); // Show last 10 orders
+            
+            if (recentOrders.length === 0) {
+                recentOrdersList.innerHTML = `
+                    <div class="table-row">
+                        <span colspan="6" style="text-align: center; color: #6b7280;">No hay pedidos recientes</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentOrdersList.innerHTML = recentOrders.map(order => {
+                const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                
+                return `
+                    <div class="table-row">
+                        <span>#${order.orderNumber}</span>
+                        <span>${order.customerName}</span>
+                        <span>${itemsText}</span>
+                        <span>$${order.total}</span>
+                        <span class="status ${order.status.toLowerCase()}">${order.status}</span>
+                        <span>${orderTime}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadDashboardDataOld() {
+            try {
+                const response = fetch('/api/products/sales-stats', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -192,22 +256,7 @@
             
             // Update recent orders (mock data)
             const recentOrdersList = document.getElementById('recentOrdersList');
-            const mockOrders = [
-                { id: 'ORD-001', customer: 'Ana García', items: 'Pizza, Jugo', total: '$950', status: 'Completado', time: '14:30' },
-                { id: 'ORD-002', customer: 'Carlos López', items: 'Sándwich, Papas', total: '$1200', status: 'Preparando', time: '14:25' },
-                { id: 'ORD-003', customer: 'María Rodríguez', items: 'Ensalada, Agua', total: '$650', status: 'Completado', time: '14:20' }
-            ];
-            
-            recentOrdersList.innerHTML = mockOrders.map(order => `
-                <div class="table-row">
-                    <span>${order.id}</span>
-                    <span>${order.customer}</span>
-                    <span>${order.items}</span>
-                    <span>${order.total}</span>
-                    <span class="status ${order.status.toLowerCase()}">${order.status}</span>
-                    <span>${order.time}</span>
-                </div>
-            `).join('');
+            // This will be updated by updateRecentOrders function
         }
 
         // Logout functionality

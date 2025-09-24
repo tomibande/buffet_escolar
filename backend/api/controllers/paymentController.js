@@ -1,9 +1,10 @@
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 const { v4: uuidv4 } = require('uuid');
+const dataManager = require('../../utils/dataManager');
 
 // Initialize Mercado Pago client
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || 'TEST-YOUR-ACCESS-TOKEN',
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || 'TEST-2429502995306401-092321-44fdc612e60f3dc4014a3c8707d2b0f7-191149729',
   options: {
     timeout: 5000,
     idempotencyKey: 'abc'
@@ -49,6 +50,18 @@ class PaymentController {
 
       const response = await preference.create({ body: preferenceData });
       
+      // Store order data temporarily for webhook processing
+      const orderData = {
+        preferenceId: response.id,
+        items,
+        payer,
+        total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      };
+      
+      // Store in a temporary orders cache (you might want to use Redis in production)
+      global.pendingOrders = global.pendingOrders || {};
+      global.pendingOrders[response.id] = orderData;
+      
       res.json({
         success: true,
         data: {
@@ -71,38 +84,46 @@ class PaymentController {
       const { type, data } = req.body;
       
       if (type === 'payment') {
-        // Here you would process the payment
-        // For now, we'll just log it
         console.log('Payment notification received:', {
           type,
           paymentId: data.id,
           timestamp: new Date().toISOString()
         });
         
-        // Record the sale in our system
-        if (req.body.items) {
-          try {
-            const response = await fetch('http://localhost:3000/api/products/record-sale', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ items: req.body.items })
-            });
-          } catch (error) {
-            console.error('Error recording sale:', error);
-          }
+        // Find the order data
+        const pendingOrders = global.pendingOrders || {};
+        let orderData = null;
+        
+        // Find order by preference ID (you might need to query MP API for this)
+        for (const [preferenceId, order] of Object.entries(pendingOrders)) {
+          orderData = order;
+          break; // For demo, take the first pending order
         }
         
-        // Generate order details for successful payments
-        const orderNumber = Math.floor(Math.random() * 9000) + 1000;
-        const estimatedTime = Math.floor(Math.random() * 20) + 10; // 10-30 minutes
-        
-        console.log('Order created:', {
-          orderNumber,
-          estimatedTime,
-          paymentId: data.id
-        });
+        if (orderData) {
+          // Record the sale
+          orderData.items.forEach(item => {
+            dataManager.addSale({
+              productId: item.id,
+              quantity: item.quantity,
+              revenue: item.price * item.quantity
+            });
+          });
+          
+          // Create order record
+          const newOrder = dataManager.addOrder({
+            items: orderData.items,
+            customerName: `${orderData.payer.firstName} ${orderData.payer.lastName}`,
+            total: orderData.total,
+            paymentId: data.id,
+            estimatedTime: Math.floor(Math.random() * 20) + 10
+          });
+          
+          console.log('Order created:', newOrder);
+          
+          // Clean up pending orders
+          delete global.pendingOrders[orderData.preferenceId];
+        }
       }
       
       res.status(200).send('OK');
@@ -116,8 +137,6 @@ class PaymentController {
     try {
       const { paymentId } = req.params;
       
-      // In a real implementation, you would fetch the payment status from Mercado Pago
-      // For now, we'll return a mock response
       res.json({
         success: true,
         data: {
@@ -130,6 +149,45 @@ class PaymentController {
       res.status(500).json({ 
         success: false, 
         message: 'Error al obtener el estado del pago' 
+      });
+    }
+  }
+
+  static async createTestOrder(req, res) {
+    try {
+      const { items, payer } = req.body;
+      
+      // Record the sale
+      items.forEach(item => {
+        dataManager.addSale({
+          productId: item.id,
+          quantity: item.quantity,
+          revenue: item.price * item.quantity
+        });
+      });
+      
+      // Create order record
+      const newOrder = dataManager.addOrder({
+        items,
+        customerName: `${payer.firstName} ${payer.lastName}`,
+        total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        paymentId: `TEST-${Date.now()}`,
+        estimatedTime: Math.floor(Math.random() * 20) + 10
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          orderNumber: newOrder.orderNumber,
+          estimatedTime: newOrder.estimatedTime,
+          orderId: newOrder.id
+        }
+      });
+    } catch (error) {
+      console.error('Error creating test order:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error al crear el pedido de prueba' 
       });
     }
   }

@@ -21,8 +21,8 @@ class CafeteriaApp {
     }
 
     initializeMercadoPago() {
-        if (typeof MercadoPago !== 'undefined') {
-            this.mp = new MercadoPago('TEST-YOUR-PUBLIC-KEY', {
+        if (typeof MercadoPago !== 'undefined' && window.location.pathname === '/') {
+            this.mp = new MercadoPago('TEST-2429502995306401-092321-8e4364b1e9ee3c0c38c5c0967b0f6365-191149729', {
                 locale: 'es-AR'
             });
         }
@@ -385,45 +385,60 @@ class CafeteriaApp {
                     items: this.cart,
                     payer: {
                         firstName,
-                        lastName
+                        lastName,
+                        email: 'test@test.com'
                     }
                 })
             });
 
             const result = await response.json();
             
-            if (result.success && this.mp) {
-                // Record the sale before payment
-                await fetch('/api/products/record-sale', {
+            if (result.success) {
+                loadingOverlay.classList.remove('active');
+                
+                // For testing purposes, create order directly
+                const testOrderResponse = await fetch('/api/payments/create-test-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ items: this.cart })
+                    body: JSON.stringify({
+                        items: this.cart,
+                        payer: { firstName, lastName }
+                    })
                 });
                 
+                const testOrderResult = await testOrderResponse.json();
+                
+                if (testOrderResult.success) {
+                    this.handlePaymentSuccess(firstName, lastName, testOrderResult.data);
+                    return;
+                }
+                
+                // If you have real Mercado Pago credentials, uncomment this:
+                /*
                 // Create Mercado Pago wallet
-                const bricks = this.mp.bricks();
-                await bricks.create("wallet", "wallet_container", {
-                    initialization: {
-                        preferenceId: result.data.preferenceId,
-                    },
-                    callbacks: {
-                        onReady: () => {
-                            loadingOverlay.classList.remove('active');
-                            document.getElementById('wallet_container').style.display = 'block';
+                if (this.mp) {
+                    const bricks = this.mp.bricks();
+                    await bricks.create("wallet", "wallet_container", {
+                        initialization: {
+                            preferenceId: result.data.preferenceId,
                         },
-                        onSubmit: (data) => {
-                            // Payment submitted
-                            this.handlePaymentSuccess(firstName, lastName);
-                        },
-                        onError: (error) => {
-                            console.error('Payment error:', error);
-                            loadingOverlay.classList.remove('active');
-                            alert('Error en el pago. Por favor intenta nuevamente.');
+                        callbacks: {
+                            onReady: () => {
+                                document.getElementById('wallet_container').style.display = 'block';
+                            },
+                            onSubmit: (data) => {
+                                this.handlePaymentSuccess(firstName, lastName);
+                            },
+                            onError: (error) => {
+                                console.error('Payment error:', error);
+                                alert('Error en el pago. Por favor intenta nuevamente.');
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                */
             } else {
                 throw new Error('Error creating payment preference');
             }
@@ -434,10 +449,9 @@ class CafeteriaApp {
         }
     }
 
-    handlePaymentSuccess(firstName, lastName) {
-        // Generate order number and estimated time
-        const orderNumber = Math.floor(Math.random() * 9000) + 1000;
-        const estimatedTime = Math.floor(Math.random() * 20) + 10; // 10-30 minutes
+    handlePaymentSuccess(firstName, lastName, orderData = null) {
+        const orderNumber = orderData ? orderData.orderNumber : Math.floor(Math.random() * 9000) + 1000;
+        const estimatedTime = orderData ? orderData.estimatedTime : Math.floor(Math.random() * 20) + 10;
         
         // Update success modal
         document.getElementById('orderNumber').textContent = `#${orderNumber}`;

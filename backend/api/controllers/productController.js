@@ -123,6 +123,15 @@ class ProductController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
+  static async getOrders(req, res) {
+    try {
+      const orders = dataManager.loadOrders();
+      res.json({ success: true, data: orders });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = ProductController;

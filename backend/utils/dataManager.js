@@ -83,6 +83,46 @@ class DataManager {
     return true;
   }
 
+  // Orders methods
+  loadOrders() {
+    try {
+      const ordersPath = path.join(__dirname, '../data/orders.json');
+      if (fs.existsSync(ordersPath)) {
+        const data = fs.readFileSync(ordersPath, 'utf8');
+        return JSON.parse(data);
+      }
+      return [];
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      return [];
+    }
+  }
+
+  saveOrders(orders) {
+    try {
+      const ordersPath = path.join(__dirname, '../data/orders.json');
+      fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
+      return true;
+    } catch (error) {
+      console.error('Error saving orders:', error);
+      return false;
+    }
+  }
+
+  addOrder(orderData) {
+    const orders = this.loadOrders();
+    const newOrder = {
+      id: `ORD-${Date.now()}`,
+      orderNumber: Math.floor(Math.random() * 9000) + 1000,
+      ...orderData,
+      createdAt: new Date().toISOString(),
+      status: 'Preparando'
+    };
+    orders.push(newOrder);
+    this.saveOrders(orders);
+    return newOrder;
+  }
+
   // Sales methods
   loadSales() {
     try {
