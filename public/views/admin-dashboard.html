@@ -46,18 +46,7 @@
                 <div class="stat-content">
                     <h3>Ingresos Totales</h3>
                     <div class="stat-value" id="totalRevenue">$0</div>
-                    <p class="stat-change">Desde el inicio</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>Pedidos Hoy</h3>
-                    <div class="stat-value" id="todayOrders">0</div>
-                    <p class="stat-change">Total del día</p>
+                    <p class="stat-change" id="revenueChange">Sin ventas registradas</p>
                 </div>
             </div>
             
@@ -67,8 +56,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>Producto Más Vendido</h3>
-                    <div class="stat-value" id="topProduct">-</div>
-                    <p class="stat-change">Histórico</p>
+                    <div class="stat-value" id="topProduct">Sin datos</div>
+                    <p class="stat-change" id="topProductSales">0 unidades vendidas</p>
                 </div>
             </div>
             
@@ -82,14 +71,15 @@
                     <p class="stat-change">En el menú</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="charts-section">
-            <div class="chart-card">
-                <h3>Productos Más Vendidos</h3>
-                <div class="top-products" id="topProductsList">
-                    <!-- Will be populated by JavaScript -->
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Ventas</h3>
+                    <div class="stat-value" id="totalSales">0</div>
+                    <p class="stat-change">Productos vendidos</p>
                 </div>
             </div>
         </div>
@@ -110,8 +100,8 @@
             </div>
         </div>
 
-        <!-- Recent Orders -->
-        <div class="recent-orders">
+        <!-- Recent Orders (only show if there are orders) -->
+        <div class="recent-orders" id="recentOrdersSection" style="display: none;">
             <h3>Pedidos Recientes</h3>
             <div class="orders-table">
                 <div class="table-header">
@@ -241,15 +231,302 @@
         }
 
         function updateDashboard(data) {
-            // Update total revenue
-            document.getElementById('totalRevenue').textContent = `$${data.totalRevenue}`;
+            // # Actualizar ingresos totales
+            const totalRevenue = data.totalRevenue || 0;
+            document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
             
-            // Update today's orders
-            document.getElementById('todayOrders').textContent = '0';
+            if (totalRevenue > 0) {
+                document.getElementById('revenueChange').textContent = 'Desde el inicio';
+                document.getElementById('revenueChange').className = 'stat-change positive';
+            } else {
+                document.getElementById('revenueChange').textContent = 'Sin ventas registradas';
+                document.getElementById('revenueChange').className = 'stat-change';
+            }
             
-            // Update top product
-            if (data.topProducts.length > 0) {
-                document.getElementById('topProduct').textContent = data.topProducts[0].productName;
+            // # Actualizar producto más vendido
+            if (data.topProducts && data.topProducts.length > 0) {
+                const topProduct = data.topProducts[0];
+                document.getElementById('topProduct').textContent = topProduct.productName;
+                document.getElementById('topProductSales').textContent = `${topProduct.quantity} unidades vendidas`;
+            } else {
+                document.getElementById('topProduct').textContent = 'Sin datos';
+                document.getElementById('topProductSales').textContent = '0 unidades vendidas';
+            }
+            
+            // # Actualizar total de ventas (cantidad de productos vendidos)
+            const totalSales = data.productSales ? data.productSales.reduce((sum, sale) => sum + sale.quantity, 0) : 0;
+            document.getElementById('totalSales').textContent = totalSales;
+        }
+
+        function updateRecentOrders(orders) {
+            const recentOrdersSection = document.getElementById('recentOrdersSection');
+            const recentOrdersList = document.getElementById('recentOrdersList');
+            
+            // # Solo mostrar la sección si hay pedidos
+            if (!orders || orders.length === 0) {
+                recentOrdersSection.style.display = 'none';
+                return;
+            }
+            
+            recentOrdersSection.style.display = 'block';
+            const recentOrders = orders.slice(-10).reverse(); // # Mostrar últimos 10 pedidos
+            
+            recentOrdersList.innerHTML = recentOrders.map(order => {
+                const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                
+                return `
+                    <div class="table-row">
+                        <span>#${order.orderNumber}</span>
+                        <span>${order.customerName}</span>
+                        <span>${itemsText}</span>
+                        <span>$${order.total}</span>
+                        <span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>
+                        <span>${orderTime}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            
+            if (products.length === 0) {
+                productsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280;">
+                        <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>No hay productos en el menú</h3>
+                        <p>Agrega productos para comenzar a gestionar tu cafetería</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            productsGrid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Sin+Imagen'">
+                    </div>
+                    <div class="product-info">
+                        <h4>${product.name}</h4>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-details">
+                            <span class="product-price">$${product.price}</span>
+                            <span class="product-category">${product.category}</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddProductModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Agregar Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                editingProductId = productId;
+                document.getElementById('modalTitle').textContent = 'Editar Producto';
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productImage').value = product.image;
+                document.getElementById('productModal').classList.add('active');
+            }
+        }
+
+        async function saveProduct() {
+            const formData = new FormData(document.getElementById('productForm'));
+            const productData = {
+                name: formData.get('name'),
+                price: parseInt(formData.get('price')),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                image: formData.get('image') || 'https://via.placeholder.com/200x150?text=Sin+Imagen'
+            };
+
+            // # Validación básica
+            if (!productData.name || !productData.price || !productData.description || !productData.category) {
+                alert('Por favor completa todos los campos obligatorios');
+                return;
+            }
+
+            if (productData.price <= 0) {
+                alert('El precio debe ser mayor a 0');
+                return;
+            }
+
+            try {
+                const url = editingProductId 
+                    ? `/api/products/${editingProductId}` 
+                    : '/api/products';
+                const method = editingProductId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    closeModal('productModal');
+                    loadDashboardData();
+                    
+                    // # Mostrar mensaje de éxito
+                    const action = editingProductId ? 'actualizado' : 'agregado';
+                    showSuccessMessage(`Producto ${action} exitosamente`);
+                } else {
+                    alert(result.message || 'Error al guardar el producto');
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert('Error al guardar el producto');
+            }
+        }
+
+        async function deleteProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            const productName = product ? product.name : 'este producto';
+            
+            if (confirm(`¿Estás seguro de que quieres eliminar "${productName}"? Esta acción no se puede deshacer.`)) {
+                try {
+                    const response = await fetch(`/api/products/${productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        loadDashboardData();
+                        showSuccessMessage('Producto eliminado exitosamente');
+                    } else {
+                        alert(result.message || 'Error al eliminar el producto');
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    alert('Error al eliminar el producto');
+                }
+            }
+        }
+
+        // # Función para mostrar mensajes de éxito
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+                font-weight: 500;
+                animation: slideIn 0.3s ease-out;
+            `;
+            successDiv.innerHTML = `
+                <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.style.animation = 'slideOut 0.3s ease-in forwards';
+                setTimeout(() => {
+                    document.body.removeChild(successDiv);
+                }, 300);
+            }, 3000);
+        }
+
+        // # Agregar estilos para las animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // # Funcionalidad de logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/api/auth/login';
+            }
+        });
+
+        // # Dropdown del usuario
+        document.getElementById('userBtn').addEventListener('click', () => {
+            document.getElementById('userDropdown').classList.toggle('active');
+        });
+
+        // # Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const userMenu = document.querySelector('.user-menu');
+            if (!userMenu.contains(e.target)) {
+                document.getElementById('userDropdown').classList.remove('active');
+            }
+        });
+
+        // # Cargar datos del dashboard al cargar la página
+        loadDashboardData();
+
+        // # Actualizar datos cada 30 segundos
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>
             } else {
                 document.getElementById('topProduct').textContent = 'Ninguno';
             }

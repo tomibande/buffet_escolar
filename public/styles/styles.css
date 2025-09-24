@@ -1087,13 +1087,29 @@ section {
 }
 /* Auth Pages */
 .auth-page {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    animation: gradientShift 10s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    25% {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    }
+    50% {
+        background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+    }
+    75% {
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #0d9488 100%);
+    }
 }
 
 .auth-page::before {
@@ -1103,9 +1119,20 @@ section {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+    animation: backgroundPulse 8s ease-in-out infinite;
+}
+
+@keyframes backgroundPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .auth-container {
@@ -1114,17 +1141,41 @@ section {
     width: 100%;
     max-width: 450px;
     padding: var(--spacing-md);
+    animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-card {
     background: white;
     border-radius: var(--radius-xl);
     padding: var(--spacing-2xl);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25), 
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.auth-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 35px 60px -12px rgba(0, 0, 0, 0.3), 
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .auth-card::before {
@@ -1133,14 +1184,36 @@ section {
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 5px;
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
     z-index: 1;
+    animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
 }
 
 .auth-header {
     text-align: center;
     margin-bottom: var(--spacing-2xl);
+    animation: fadeInDown 0.6s ease-out 0.2s both;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-logo {
@@ -1149,40 +1222,87 @@ section {
     justify-content: center;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-lg);
+    animation: bounceIn 0.8s ease-out 0.4s both;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .auth-logo i {
-    font-size: 3rem;
+    font-size: 3.5rem;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .auth-logo h1 {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-3xl);
     margin: 0;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .auth-header h2 {
     margin-bottom: var(--spacing-sm);
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-3xl);
     color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .auth-header p {
     color: var(--text-secondary);
     margin: 0;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
+    font-weight: 400;
 }
 
 .auth-form {
     margin-bottom: var(--spacing-xl);
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .form-group {
@@ -1198,45 +1318,56 @@ section {
 .form-group label {
     display: block;
     margin-bottom: var(--spacing-sm);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .input-group {
     position: relative;
     display: flex;
     align-items: center;
+    transition: all 0.3s ease;
+}
+
+.input-group:hover {
+    transform: translateY(-1px);
 }
 
 .input-group i {
     position: absolute;
-    left: var(--spacing-md);
-    color: var(--secondary-color);
+    left: var(--spacing-lg);
+    color: var(--primary-color);
     z-index: 1;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     transition: color var(--transition-fast);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .input-group input:focus + i,
 .input-group select:focus + i,
 .input-group textarea:focus + i {
-    color: var(--primary-color);
+    color: var(--secondary-color);
+    transform: scale(1.1);
 }
 
 .input-group input,
 .input-group select,
 .input-group textarea {
     width: 100%;
-    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-lg) 3rem;
-    border: 2px solid var(--border-color);
+    padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-xl) 3.5rem;
+    border: 3px solid var(--border-color);
     border-radius: var(--radius-lg);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
+    font-weight: 500;
     transition: all var(--transition-fast);
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+        inset 0 2px 4px 0 rgba(0, 0, 0, 0.06),
+        0 0 0 0 rgba(6, 182, 212, 0);
     backdrop-filter: blur(10px);
 }
 
@@ -1248,26 +1379,33 @@ section {
 .input-group select:focus,
 .input-group textarea:focus {
     outline: none;
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+    border-color: var(--primary-color);
+    box-shadow: 
+        0 0 0 4px rgba(79, 70, 229, 0.15), 
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 0 20px rgba(79, 70, 229, 0.1);
+    transform: translateY(-2px);
     background: white;
 }
 
 .password-toggle {
     position: absolute;
-    right: var(--spacing-md);
+    right: var(--spacing-lg);
     background: none;
     border: none;
     color: var(--primary-color);
     cursor: pointer;
     z-index: 1;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     transition: color var(--transition-fast);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
 }
 
 .password-toggle:hover {
-    color: var(--primary-dark);
+    color: var(--secondary-color);
+    background: rgba(79, 70, 229, 0.1);
+    transform: scale(1.1);
 }
 
 .form-options {
@@ -1275,7 +1413,17 @@ section {
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-xl);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
+    animation: fadeIn 0.6s ease-out 0.8s both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .checkbox-label {
@@ -1283,7 +1431,13 @@ section {
     align-items: center;
     gap: var(--spacing-sm);
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label:hover {
+    color: var(--primary-color);
+    transform: translateX(2px);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -1291,19 +1445,24 @@ section {
 }
 
 .checkmark {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border-color);
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-color);
     border-radius: var(--radius-md);
     position: relative;
     transition: all var(--transition-fast);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 
+        var(--shadow-sm),
+        inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: 
+        0 0 0 3px rgba(79, 70, 229, 0.2),
+        0 4px 8px rgba(79, 70, 229, 0.3);
+    transform: scale(1.05);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
@@ -1313,29 +1472,41 @@ section {
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .forgot-link {
     color: var(--primary-color);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-size: var(--font-size-base);
+    font-weight: 700;
     transition: color var(--transition-fast);
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .forgot-link:hover {
-    color: var(--primary-dark);
+    color: var(--secondary-color);
+    text-decoration: none;
+    transform: translateY(-1px);
 }
 
 .auth-footer {
     text-align: center;
     color: var(--text-secondary);
+    animation: fadeIn 0.6s ease-out 1s both;
 }
 
 .auth-footer a {
     color: var(--primary-color);
-    font-weight: 600;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.auth-footer a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
 }
 
 .auth-background {
@@ -1351,33 +1522,70 @@ section {
 .bg-shape {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    animation: float 6s ease-in-out infinite;
+    background: rgba(255, 255, 255, 0.08);
+    animation: float 8s ease-in-out infinite;
     backdrop-filter: blur(2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .shape-1 {
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     top: 10%;
     left: 10%;
     animation-delay: 0s;
 }
 
 .shape-2 {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     top: 60%;
     right: 10%;
-    animation-delay: 2s;
+    animation-delay: 3s;
 }
 
 .shape-3 {
-    width: 150px;
-    height: 150px;
+    width: 180px;
+    height: 180px;
     bottom: 20%;
     left: 60%;
-    animation-delay: 4s;
+    animation-delay: 6s;
+}
+
+/* # Mejoras adicionales para el botón de login */
+.auth-form .btn-primary {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 15px rgba(79, 70, 229, 0.4),
+        0 0 20px rgba(79, 70, 229, 0.2);
+    transition: all 0.3s ease;
+}
+
+.auth-form .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 8px 25px rgba(79, 70, 229, 0.5),
+        0 0 30px rgba(79, 70, 229, 0.3);
+}
+
+.auth-form .btn-primary:active {
+    transform: translateY(-1px);
+}
+
+/* # Efectos de carga para inputs */
+.input-group input:valid {
+    border-color: var(--success-color);
+}
+
+.input-group input:valid + i {
+    color: var(--success-color);
 }
 
 /* Dashboard Styles */
