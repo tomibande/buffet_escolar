@@ -56,8 +56,9 @@
                 </div>
                 <div class="stat-content">
                     <h3>Producto Más Vendido</h3>
+                    <h3>Producto Favorito</h3>
                     <div class="stat-value" id="topProduct">Sin datos</div>
-                    <p class="stat-change" id="topProductSales">0 unidades vendidas</p>
+                    <p class="stat-change" id="topProductSales">Sin datos disponibles</p>
                 </div>
             </div>
             
@@ -79,7 +80,7 @@
                 <div class="stat-content">
                     <h3>Total Ventas</h3>
                     <div class="stat-value" id="totalSales">0</div>
-                    <p class="stat-change">Productos vendidos</p>
+                    <p class="stat-change">Productos vendidos hoy</p>
                 </div>
             </div>
         </div>
@@ -159,12 +160,18 @@
         }
 
         function updateDashboard(data) {
-            // Update total revenue
-            const totalRevenue = data.totalRevenue || 0;
+            // Update total revenue (from today onwards)
+            const today = new Date().toISOString().split('T')[0];
+            const todayRevenue = data.productSales 
+                ? data.productSales
+                    .filter(sale => sale.date >= today)
+                    .reduce((sum, sale) => sum + sale.revenue, 0)
+                : 0;
+            const totalRevenue = todayRevenue;
             document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
             
             if (totalRevenue > 0) {
-                document.getElementById('revenueChange').textContent = 'Desde el inicio';
+                document.getElementById('revenueChange').textContent = 'Desde hoy';
                 document.getElementById('revenueChange').className = 'stat-change positive';
             } else {
                 document.getElementById('revenueChange').textContent = 'Sin ventas registradas';
@@ -175,14 +182,19 @@
             if (data.topProducts && data.topProducts.length > 0) {
                 const topProduct = data.topProducts[0];
                 document.getElementById('topProduct').textContent = topProduct.productName;
-                document.getElementById('topProductSales').textContent = `${topProduct.quantity} unidades vendidas`;
+                document.getElementById('topProductSales').textContent = 'Producto favorito';
             } else {
                 document.getElementById('topProduct').textContent = 'Sin datos';
-                document.getElementById('topProductSales').textContent = '0 unidades vendidas';
+                document.getElementById('topProductSales').textContent = 'Sin datos disponibles';
             }
             
-            // Update total sales
-            const totalSales = data.productSales ? data.productSales.reduce((sum, sale) => sum + sale.quantity, 0) : 0;
+            // Update total sales (today only)
+            const todaySales = data.productSales 
+                ? data.productSales
+                    .filter(sale => sale.date === today)
+                    .reduce((sum, sale) => sum + sale.quantity, 0)
+                : 0;
+            const totalSales = todaySales;
             document.getElementById('totalSales').textContent = totalSales;
             
             // Update top products list

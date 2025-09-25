@@ -129,5 +129,29 @@
     "paymentStatus": "pending",
     "createdAt": "2025-09-25T01:34:21.681Z",
     "status": "Pendiente de Pago"
+  },
+  {
+    "id": "ORD-1758768524970",
+    "orderNumber": 7130,
+    "items": [
+      {
+        "id": 1,
+        "name": "Sándwich de Pollo",
+        "description": "Pechuga de pollo a la parrilla con lechuga, tomate y mayonesa",
+        "price": 850,
+        "category": "principal",
+        "image": "https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg?auto=compress&cs=tinysrgb&w=400",
+        "available": true,
+        "rating": 4.5,
+        "quantity": 1
+      }
+    ],
+    "customerName": "hola bande",
+    "total": 850,
+    "paymentId": null,
+    "estimatedTime": 26,
+    "paymentStatus": "pending",
+    "createdAt": "2025-09-25T02:48:44.970Z",
+    "status": "Pendiente de Pago"
   }
 ]
