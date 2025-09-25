@@ -70,15 +70,11 @@ class ProductController {
       const products = dataManager.loadProducts();
       const sales = dataManager.loadSales();
       
-      // Get today's date for filtering
-      const today = new Date().toISOString().split('T')[0];
+      // Calculate total cumulative revenue from all days
+      const totalRevenue = sales.reduce((sum, sale) => sum + sale.revenue, 0);
       
-      // Filter sales to only include today's sales
-      const todaySales = sales.filter(sale => sale.date === today);
-      
-      const totalRevenue = todaySales.reduce((sum, sale) => sum + sale.revenue, 0);
-      
-      const productSales = todaySales.reduce((acc, sale) => {
+      // Get all product sales data for weekly view
+      const productSales = sales.reduce((acc, sale) => {
         const product = products.find(p => p.id === sale.productId);
         if (product) {
           acc.push({
@@ -91,8 +87,26 @@ class ProductController {
         return acc;
       }, []);
 
-      // Remove topProducts calculation since we're not showing it
-      const topProducts = [];
+      // Calculate top products from all sales data
+      const productTotals = sales.reduce((acc, sale) => {
+        const product = products.find(p => p.id === sale.productId);
+        if (product) {
+          if (!acc[sale.productId]) {
+            acc[sale.productId] = {
+              productName: product.name,
+              totalQuantity: 0,
+              totalRevenue: 0
+            };
+          }
+          acc[sale.productId].totalQuantity += sale.quantity;
+          acc[sale.productId].totalRevenue += sale.revenue;
+        }
+        return acc;
+      }, {});
+      
+      const topProducts = Object.values(productTotals)
+        .sort((a, b) => b.totalQuantity - a.totalQuantity)
+        .slice(0, 5);
 
       res.json({
         success: true,

@@ -80,7 +80,7 @@
                 <div class="stat-content">
                     <h3>Total Ventas</h3>
                     <div class="stat-value" id="totalSales">0</div>
-                    <p class="stat-change">Productos vendidos hoy</p>
+                    <p class="stat-change">Productos vendidos total</p>
                 </div>
             </div>
         </div>
@@ -130,17 +130,12 @@
         }
 
         function updateDashboard(data) {
-            // Update total revenue (today only)
-            const today = new Date().toISOString().split('T')[0];
-            const totalRevenue = data.productSales 
-                ? data.productSales
-                    .filter(sale => sale.date === today)
-                    .reduce((sum, sale) => sum + sale.revenue, 0)
-                : 0;
+            // Update total cumulative revenue from all days
+            const totalRevenue = data.totalRevenue || 0;
             document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
             
             if (totalRevenue > 0) {
-                document.getElementById('revenueChange').textContent = 'Ventas de hoy';
+                document.getElementById('revenueChange').textContent = 'Ingresos acumulados';
                 document.getElementById('revenueChange').className = 'stat-change positive';
             } else {
                 document.getElementById('revenueChange').textContent = 'Sin ventas registradas';
@@ -151,19 +146,16 @@
             if (data.topProducts && data.topProducts.length > 0) {
                 const topProduct = data.topProducts[0];
                 document.getElementById('topProduct').textContent = topProduct.productName;
-                document.getElementById('topProductSales').textContent = 'Producto favorito';
+                document.getElementById('topProductSales').textContent = `${topProduct.totalQuantity} vendidos`;
             } else {
                 document.getElementById('topProduct').textContent = 'Sin datos';
                 document.getElementById('topProductSales').textContent = 'Sin datos disponibles';
             }
             
-            // Update total sales (today only)
-            const todaySales = data.productSales 
-                ? data.productSales
-                    .filter(sale => sale.date === today)
-                    .reduce((sum, sale) => sum + sale.quantity, 0)
+            // Update total cumulative sales from all days
+            const totalSales = data.productSales 
+                ? data.productSales.reduce((sum, sale) => sum + sale.quantity, 0)
                 : 0;
-            const totalSales = todaySales;
             document.getElementById('totalSales').textContent = totalSales;
         }
 
