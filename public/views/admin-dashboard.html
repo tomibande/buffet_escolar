@@ -85,27 +85,6 @@
             </div>
         </div>
 
-        <!-- Weekly Sales Chart -->
-        <div class="charts-section">
-            <div class="chart-card" style="grid-column: 1 / -1;">
-                <h3>Ventas por Día de la Semana (Miércoles a Martes)</h3>
-                <div class="sales-chart">
-                    <div class="chart-container" id="weeklyChart">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top Products -->
-        <div class="charts-section">
-            <div class="chart-card">
-                <h3>Productos Más Vendidos</h3>
-                <div class="top-products" id="topProductsList">
-                    <!-- Will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -127,16 +106,11 @@
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     }),
-                    fetch('/api/products/orders', {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    })
+                    Promise.resolve({ success: true, data: [] }) // Remove orders fetch
                 ]);
                 
                 const productsResult = await productsResponse.json();
                 const statsResult = await statsResponse.json();
-                const ordersResult = await ordersResponse.json();
                 
                 if (productsResult.success) {
                     products = productsResult.data;
@@ -145,10 +119,6 @@
                 
                 if (statsResult.success) {
                     updateDashboard(statsResult.data);
-                }
-                
-                if (ordersResult.success) {
-                    updateWeeklySales(ordersResult.data);
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -160,18 +130,17 @@
         }
 
         function updateDashboard(data) {
-            // Update total revenue (from today onwards)
+            // Update total revenue (today only)
             const today = new Date().toISOString().split('T')[0];
-            const todayRevenue = data.productSales 
+            const totalRevenue = data.productSales 
                 ? data.productSales
-                    .filter(sale => sale.date >= today)
+                    .filter(sale => sale.date === today)
                     .reduce((sum, sale) => sum + sale.revenue, 0)
                 : 0;
-            const totalRevenue = todayRevenue;
             document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
             
             if (totalRevenue > 0) {
-                document.getElementById('revenueChange').textContent = 'Desde hoy';
+                document.getElementById('revenueChange').textContent = 'Ventas de hoy';
                 document.getElementById('revenueChange').className = 'stat-change positive';
             } else {
                 document.getElementById('revenueChange').textContent = 'Sin ventas registradas';
@@ -196,70 +165,6 @@
                 : 0;
             const totalSales = todaySales;
             document.getElementById('totalSales').textContent = totalSales;
-            
-            // Update top products list
-            updateTopProductsList(data.topProducts || []);
-        }
-
-        function updateTopProductsList(topProducts) {
-            const topProductsList = document.getElementById('topProductsList');
-            
-            if (topProducts.length === 0) {
-                topProductsList.innerHTML = `
-                    <div class="product-item">
-                        <div class="product-info">
-                            <h4>No hay ventas registradas</h4>
-                            <p>Los productos más vendidos aparecerán aquí</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                topProductsList.innerHTML = topProducts.slice(0, 5).map((product, index) => `
-                    <div class="product-item">
-                        <div class="product-rank">${index + 1}</div>
-                        <div class="product-info">
-                            <h4>${product.productName}</h4>
-                            <p>${product.quantity} vendidos - $${product.revenue}</p>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function updateWeeklySales(orders) {
-            const weeklyChart = document.getElementById('weeklyChart');
-            
-            // Week starts on Wednesday (day 3)
-            const dayNames = ['Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes'];
-            const salesByDay = [0, 0, 0, 0, 0, 0, 0]; // Thu, Fri, Sat, Sun are 0 as requested
-            
-            orders.forEach(order => {
-                if (order.paymentStatus === 'confirmed') {
-                    const orderDate = new Date(order.createdAt);
-                    let dayOfWeek = orderDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-                    
-                    // Convert to our week format (Wednesday = 0)
-                    let weekDay;
-                    if (dayOfWeek === 3) weekDay = 0; // Wednesday
-                    else if (dayOfWeek === 1) weekDay = 5; // Monday  
-                    else if (dayOfWeek === 2) weekDay = 6; // Tuesday
-                    else return; // Thu, Fri, Sat, Sun are 0
-                    
-                    salesByDay[weekDay] += order.total;
-                }
-            });
-            
-            const maxSales = Math.max(...salesByDay, 1);
-            
-            weeklyChart.innerHTML = salesByDay.map((sales, index) => {
-                const height = Math.max((sales / maxSales) * 100, 5);
-                return `
-                    <div class="chart-bar" style="height: ${height}%;">
-                        <div class="bar-value">$${sales}</div>
-                        <div class="bar-label">${dayNames[index]}</div>
-                    </div>
-                `;
-            }).join('');
         }
 
         // Logout functionality

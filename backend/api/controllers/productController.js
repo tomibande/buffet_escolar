@@ -70,9 +70,15 @@ class ProductController {
       const products = dataManager.loadProducts();
       const sales = dataManager.loadSales();
       
-      const totalRevenue = sales.reduce((sum, sale) => sum + sale.revenue, 0);
+      // Get today's date for filtering
+      const today = new Date().toISOString().split('T')[0];
       
-      const productSales = sales.reduce((acc, sale) => {
+      // Filter sales to only include today's sales
+      const todaySales = sales.filter(sale => sale.date === today);
+      
+      const totalRevenue = todaySales.reduce((sum, sale) => sum + sale.revenue, 0);
+      
+      const productSales = todaySales.reduce((acc, sale) => {
         const product = products.find(p => p.id === sale.productId);
         if (product) {
           acc.push({
@@ -85,9 +91,8 @@ class ProductController {
         return acc;
       }, []);
 
-      const topProducts = productSales
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 5);
+      // Remove topProducts calculation since we're not showing it
+      const topProducts = [];
 
       res.json({
         success: true,
