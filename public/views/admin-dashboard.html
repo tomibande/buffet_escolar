@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <i class="fas fa-cog"></i>
+                <i class="fas fa-chart-line"></i>
                 <span>Panel de Administrador</span>
             </div>
             <div class="nav-actions">
@@ -34,7 +34,7 @@
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1>Panel de Administración</h1>
-            <p>Gestiona productos y precios de la cafetería</p>
+            <p>Estadísticas y análisis de ventas de la cafetería</p>
         </div>
 
         <!-- Stats Cards -->
@@ -84,95 +84,25 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="showAddProductModal()">
-                <i class="fas fa-plus"></i>
-                Agregar Producto
-            </button>
-        </div>
-
-        <!-- Products Management -->
-        <div class="products-section">
-            <h3>Gestión de Productos</h3>
-            <div class="products-grid" id="productsGrid">
-                <!-- Will be populated by JavaScript -->
+        <!-- Weekly Sales Chart -->
+        <div class="charts-section">
+            <div class="chart-card" style="grid-column: 1 / -1;">
+                <h3>Ventas por Día de la Semana (Miércoles a Martes)</h3>
+                <div class="sales-chart">
+                    <div class="chart-container" id="weeklyChart">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Recent Orders (only show if there are orders) -->
-        <div class="recent-orders" id="recentOrdersSection" style="display: none;">
-            <h3>Pedidos Recientes</h3>
-            <div class="orders-table">
-                <div class="table-header">
-                    <span>Pedido</span>
-                    <span>Cliente</span>
-                    <span>Productos</span>
-                    <span>Total</span>
-                    <span>Estado</span>
-                    <span>Hora</span>
-                </div>
-                <div class="table-body" id="recentOrdersList">
+        <!-- Top Products -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>Productos Más Vendidos</h3>
+                <div class="top-products" id="topProductsList">
                     <!-- Will be populated by JavaScript -->
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Product Modal -->
-    <div class="modal" id="productModal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <i class="fas fa-utensils"></i>
-                <h3 id="modalTitle">Agregar Producto</h3>
-                <button class="modal-close" onclick="closeModal('productModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="productForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productName">Nombre del Producto</label>
-                            <input type="text" id="productName" name="name" required placeholder="Ej: Sándwich de Pollo">
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice">Precio ($)</label>
-                            <input type="number" id="productPrice" name="price" required placeholder="850" min="0" step="1">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="productDescription">Descripción</label>
-                        <textarea id="productDescription" name="description" required placeholder="Descripción del producto"></textarea>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productCategory">Categoría</label>
-                            <select id="productCategory" name="category" required>
-                                <option value="">Seleccionar categoría</option>
-                                <option value="principal">Plato Principal</option>
-                                <option value="acompañamiento">Acompañamiento</option>
-                                <option value="bebida">Bebida</option>
-                                <option value="postre">Postre</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="productImage">URL de Imagen</label>
-                            <input type="url" id="productImage" name="image" placeholder="https://ejemplo.com/imagen.jpg">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('productModal')">
-                    Cancelar
-                </button>
-                <button class="btn btn-primary" onclick="saveProduct()">
-                    <i class="fas fa-save"></i>
-                    Guardar Producto
-                </button>
             </div>
         </div>
     </div>
@@ -185,7 +115,6 @@
         }
 
         let products = [];
-        let editingProductId = null;
 
         // Load dashboard data
         async function loadDashboardData() {
@@ -210,7 +139,6 @@
                 
                 if (productsResult.success) {
                     products = productsResult.data;
-                    renderProducts();
                     updateProductStats(productsResult.data);
                 }
                 
@@ -219,7 +147,7 @@
                 }
                 
                 if (ordersResult.success) {
-                    updateRecentOrders(ordersResult.data);
+                    updateWeeklySales(ordersResult.data);
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -231,7 +159,7 @@
         }
 
         function updateDashboard(data) {
-            // # Actualizar ingresos totales
+            // Update total revenue
             const totalRevenue = data.totalRevenue || 0;
             document.getElementById('totalRevenue').textContent = `$${totalRevenue}`;
             
@@ -243,7 +171,7 @@
                 document.getElementById('revenueChange').className = 'stat-change';
             }
             
-            // # Actualizar producto más vendido
+            // Update top product
             if (data.topProducts && data.topProducts.length > 0) {
                 const topProduct = data.topProducts[0];
                 document.getElementById('topProduct').textContent = topProduct.productName;
@@ -253,288 +181,18 @@
                 document.getElementById('topProductSales').textContent = '0 unidades vendidas';
             }
             
-            // # Actualizar total de ventas (cantidad de productos vendidos)
+            // Update total sales
             const totalSales = data.productSales ? data.productSales.reduce((sum, sale) => sum + sale.quantity, 0) : 0;
             document.getElementById('totalSales').textContent = totalSales;
-        }
-
-        function updateRecentOrders(orders) {
-            const recentOrdersSection = document.getElementById('recentOrdersSection');
-            const recentOrdersList = document.getElementById('recentOrdersList');
-            
-            // Only show section if there are orders
-            if (!orders || orders.length === 0) {
-                recentOrdersSection.style.display = 'none';
-                return;
-            }
-            
-            recentOrdersSection.style.display = 'block';
-            const recentOrders = orders.slice(-10).reverse(); // Show last 10 orders
-            
-            recentOrdersList.innerHTML = recentOrders.map(order => {
-                const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
-                
-                return `
-                    <div class="table-row">
-                        <span>#${order.orderNumber}</span>
-                        <span>${order.customerName}</span>
-                        <span>${itemsText}</span>
-                        <span>$${order.total}</span>
-                        <span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>
-                        <span>${orderTime}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderProducts() {
-            const productsGrid = document.getElementById('productsGrid');
-            
-            if (products.length === 0) {
-                productsGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280;">
-                        <i class="fas fa-utensils" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <h3>No hay productos en el menú</h3>
-                        <p>Agrega productos para comenzar a gestionar tu cafetería</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            productsGrid.innerHTML = products.map(product => `
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Sin+Imagen'">
-                    </div>
-                    <div class="product-info">
-                        <h4>${product.name}</h4>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-details">
-                            <span class="product-price">$${product.price}</span>
-                            <span class="product-category">${product.category}</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
-                                <i class="fas fa-edit"></i>
-                                Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
-                                <i class="fas fa-trash"></i>
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showAddProductModal() {
-            editingProductId = null;
-            document.getElementById('modalTitle').textContent = 'Agregar Producto';
-            document.getElementById('productForm').reset();
-            document.getElementById('productModal').classList.add('active');
-        }
-
-        function editProduct(productId) {
-            const product = products.find(p => p.id === productId);
-            if (product) {
-                editingProductId = productId;
-                document.getElementById('modalTitle').textContent = 'Editar Producto';
-                document.getElementById('productName').value = product.name;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productDescription').value = product.description;
-                document.getElementById('productCategory').value = product.category;
-                document.getElementById('productImage').value = product.image;
-                document.getElementById('productModal').classList.add('active');
-            }
-        }
-
-        async function saveProduct() {
-            const formData = new FormData(document.getElementById('productForm'));
-            const productData = {
-                name: formData.get('name'),
-                price: parseInt(formData.get('price')),
-                description: formData.get('description'),
-                category: formData.get('category'),
-                image: formData.get('image') || 'https://via.placeholder.com/200x150?text=Sin+Imagen'
-            };
-
-            // # Validación básica
-            if (!productData.name || !productData.price || !productData.description || !productData.category) {
-                alert('Por favor completa todos los campos obligatorios');
-                return;
-            }
-
-            if (productData.price <= 0) {
-                alert('El precio debe ser mayor a 0');
-                return;
-            }
-
-            try {
-                const url = editingProductId 
-                    ? `/api/products/${editingProductId}` 
-                    : '/api/products';
-                const method = editingProductId ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(productData)
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    closeModal('productModal');
-                    loadDashboardData();
-                    
-                    // # Mostrar mensaje de éxito
-                    const action = editingProductId ? 'actualizado' : 'agregado';
-                    showSuccessMessage(`Producto ${action} exitosamente`);
-                } else {
-                    alert(result.message || 'Error al guardar el producto');
-                }
-            } catch (error) {
-                console.error('Error saving product:', error);
-                alert('Error al guardar el producto');
-            }
-        }
-
-        async function deleteProduct(productId) {
-            const product = products.find(p => p.id === productId);
-            const productName = product ? product.name : 'este producto';
-            
-            if (confirm(`¿Estás seguro de que quieres eliminar "${productName}"? Esta acción no se puede deshacer.`)) {
-                try {
-                    const response = await fetch(`/api/products/${productId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        loadDashboardData();
-                        showSuccessMessage('Producto eliminado exitosamente');
-                    } else {
-                        alert(result.message || 'Error al eliminar el producto');
-                    }
-                } catch (error) {
-                    console.error('Error deleting product:', error);
-                    alert('Error al eliminar el producto');
-                }
-            }
-        }
-
-        // # Función para mostrar mensajes de éxito
-        function showSuccessMessage(message) {
-            const successDiv = document.createElement('div');
-            successDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                padding: 1rem 1.5rem;
-                border-radius: 0.5rem;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                z-index: 9999;
-                font-weight: 500;
-                animation: slideIn 0.3s ease-out;
-            `;
-            successDiv.innerHTML = `
-                <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(successDiv);
-            
-            setTimeout(() => {
-                successDiv.style.animation = 'slideOut 0.3s ease-in forwards';
-                setTimeout(() => {
-                    document.body.removeChild(successDiv);
-                }, 300);
-            }, 3000);
-        }
-
-        // # Agregar estilos para las animaciones
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // # Funcionalidad de logout
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/api/auth/login';
-            }
-        });
-
-        // # Dropdown del usuario
-        document.getElementById('userBtn').addEventListener('click', () => {
-            document.getElementById('userDropdown').classList.toggle('active');
-        });
-
-        // # Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            const userMenu = document.querySelector('.user-menu');
-            if (!userMenu.contains(e.target)) {
-                document.getElementById('userDropdown').classList.remove('active');
-            }
-        });
-
-        // # Cargar datos del dashboard al cargar la página
-        loadDashboardData();
-
-        // # Actualizar datos cada 30 segundos
-        setInterval(loadDashboardData, 30000);
-    </script>
-</body>
-</html>
-            } else {
-                document.getElementById('topProduct').textContent = 'Ninguno';
-            }
             
             // Update top products list
+            updateTopProductsList(data.topProducts || []);
+        }
+
+        function updateTopProductsList(topProducts) {
             const topProductsList = document.getElementById('topProductsList');
             
-            if (data.topProducts.length === 0) {
+            if (topProducts.length === 0) {
                 topProductsList.innerHTML = `
                     <div class="product-item">
                         <div class="product-info">
@@ -544,7 +202,7 @@
                     </div>
                 `;
             } else {
-                topProductsList.innerHTML = data.topProducts.map((product, index) => `
+                topProductsList.innerHTML = topProducts.slice(0, 5).map((product, index) => `
                     <div class="product-item">
                         <div class="product-rank">${index + 1}</div>
                         <div class="product-info">
@@ -556,163 +214,50 @@
             }
         }
 
-        function updateRecentOrders(orders) {
-            const recentOrdersList = document.getElementById('recentOrdersList');
-            const recentOrders = orders.slice(-10).reverse(); // Show last 10 orders
+        function updateWeeklySales(orders) {
+            const weeklyChart = document.getElementById('weeklyChart');
             
-            if (recentOrders.length === 0) {
-                recentOrdersList.innerHTML = `
-                    <div class="table-row">
-                        <span colspan="6" style="text-align: center; color: #6b7280;">No hay pedidos recientes</span>
-                    </div>
-                `;
-                return;
-            }
+            // Week starts on Wednesday (day 3)
+            const dayNames = ['Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes', 'Martes'];
+            const salesByDay = [0, 0, 0, 0, 0, 0, 0]; // Thu, Fri, Sat, Sun are 0 as requested
             
-            recentOrdersList.innerHTML = recentOrders.map(order => {
-                const orderTime = new Date(order.createdAt).toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                const itemsText = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
-                
+            orders.forEach(order => {
+                if (order.paymentStatus === 'confirmed') {
+                    const orderDate = new Date(order.createdAt);
+                    let dayOfWeek = orderDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+                    
+                    // Convert to our week format (Wednesday = 0)
+                    let weekDay;
+                    if (dayOfWeek === 3) weekDay = 0; // Wednesday
+                    else if (dayOfWeek === 1) weekDay = 5; // Monday  
+                    else if (dayOfWeek === 2) weekDay = 6; // Tuesday
+                    else return; // Thu, Fri, Sat, Sun are 0
+                    
+                    salesByDay[weekDay] += order.total;
+                }
+            });
+            
+            const maxSales = Math.max(...salesByDay, 1);
+            
+            weeklyChart.innerHTML = salesByDay.map((sales, index) => {
+                const height = Math.max((sales / maxSales) * 100, 5);
                 return `
-                    <div class="table-row">
-                        <span>#${order.orderNumber}</span>
-                        <span>${order.customerName}</span>
-                        <span>${itemsText}</span>
-                        <span>$${order.total}</span>
-                        <span class="status ${order.status.toLowerCase().replace(' ', '')}">${order.status}</span>
-                        <span>${orderTime}</span>
+                    <div class="chart-bar" style="height: ${height}%;">
+                        <div class="bar-value">$${sales}</div>
+                        <div class="bar-label">${dayNames[index]}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function renderProducts() {
-            const productsGrid = document.getElementById('productsGrid');
-            productsGrid.innerHTML = products.map(product => `
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Sin+Imagen'">
-                    </div>
-                    <div class="product-info">
-                        <h4>${product.name}</h4>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-details">
-                            <span class="product-price">$${product.price}</span>
-                            <span class="product-category">${product.category}</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
-                                <i class="fas fa-edit"></i>
-                                Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
-                                <i class="fas fa-trash"></i>
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showAddProductModal() {
-            editingProductId = null;
-            document.getElementById('modalTitle').textContent = 'Agregar Producto';
-            document.getElementById('productForm').reset();
-            document.getElementById('productModal').classList.add('active');
-        }
-
-        function editProduct(productId) {
-            const product = products.find(p => p.id === productId);
-            if (product) {
-                editingProductId = productId;
-                document.getElementById('modalTitle').textContent = 'Editar Producto';
-                document.getElementById('productName').value = product.name;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productDescription').value = product.description;
-                document.getElementById('productCategory').value = product.category;
-                document.getElementById('productImage').value = product.image;
-                document.getElementById('productModal').classList.add('active');
-            }
-        }
-
-        async function saveProduct() {
-            const formData = new FormData(document.getElementById('productForm'));
-            const productData = {
-                name: formData.get('name'),
-                price: parseInt(formData.get('price')),
-                description: formData.get('description'),
-                category: formData.get('category'),
-                image: formData.get('image') || 'https://via.placeholder.com/200x150?text=Sin+Imagen'
-            };
-
-            try {
-                const url = editingProductId 
-                    ? `/api/products/${editingProductId}` 
-                    : '/api/products';
-                const method = editingProductId ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(productData)
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    closeModal('productModal');
-                    loadDashboardData();
-                    alert(result.message);
-                } else {
-                    alert(result.message || 'Error al guardar el producto');
-                }
-            } catch (error) {
-                console.error('Error saving product:', error);
-                alert('Error al guardar el producto');
-            }
-        }
-
-        async function deleteProduct(productId) {
-            if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                try {
-                    const response = await fetch(`/api/products/${productId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        loadDashboardData();
-                        alert(result.message);
-                    } else {
-                        alert(result.message || 'Error al eliminar el producto');
-                    }
-                } catch (error) {
-                    console.error('Error deleting product:', error);
-                    alert('Error al eliminar el producto');
-                }
-            }
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
         // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/api/auth/login';
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/api/auth/login';
+            }
         });
 
         // User dropdown
@@ -720,8 +265,19 @@
             document.getElementById('userDropdown').classList.toggle('active');
         });
 
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const userMenu = document.querySelector('.user-menu');
+            if (!userMenu.contains(e.target)) {
+                document.getElementById('userDropdown').classList.remove('active');
+            }
+        });
+
         // Load dashboard data on page load
         loadDashboardData();
+
+        // Update data every 30 seconds
+        setInterval(loadDashboardData, 30000);
     </script>
 </body>
 </html>
