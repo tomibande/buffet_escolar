@@ -72,14 +72,23 @@ class DataManager {
 
   deleteProduct(id) {
     const products = this.loadProducts();
+    console.log('Current products:', products.length);
+    console.log('Deleting product ID:', id, 'Type:', typeof id);
+    
     const productIndex = products.findIndex(p => p.id === parseInt(id));
+    console.log('Found product at index:', productIndex);
     
     if (productIndex === -1) {
+      console.log('Product not found for deletion');
       throw new Error('Product not found');
     }
     
+    const deletedProduct = products[productIndex];
+    console.log('Deleting product:', deletedProduct.name);
+    
     products.splice(productIndex, 1);
     this.saveProducts(products);
+    console.log('Products after deletion:', products.length);
     return true;
   }
 

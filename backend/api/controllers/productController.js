@@ -48,13 +48,17 @@ class ProductController {
   static async deleteProduct(req, res) {
     try {
       const { id } = req.params;
+      console.log('Attempting to delete product with ID:', id);
+      
       dataManager.deleteProduct(id);
       
+      console.log('Product deleted successfully');
       res.json({
         success: true,
         message: 'Producto eliminado exitosamente'
       });
     } catch (error) {
+      console.error('Delete product error:', error);
       if (error.message === 'Product not found') {
         return res.status(404).json({ 
           success: false, 
