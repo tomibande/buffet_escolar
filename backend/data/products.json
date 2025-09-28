@@ -58,15 +58,5 @@
     "image": "https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg?auto=compress&cs=tinysrgb&w=400",
     "available": true,
     "rating": 4.8
-  },
-  {
-    "id": 7,
-    "name": "Tomi",
-    "price": 345,
-    "description": "234",
-    "category": "principal",
-    "image": "24234",
-    "available": true,
-    "rating": 0
   }
 ]
