@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Cafetería Escolar</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-icon i {
+            font-size: 3.5rem;
+            color: white;
+        }
+
+        .profile-info {
+            background: #f7fafc;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.8rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.5);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div id="loadingState" class="loading">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+            <p style="margin-top: 1rem;">Cargando perfil...</p>
+        </div>
+
+        <div id="profileContent" style="display: none;">
+            <div class="profile-header">
+                <div class="profile-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1>Mi Perfil</h1>
+            </div>
+
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i> Nombre:</span>
+                    <span class="info-value" id="userName">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i> Apellido:</span>
+                    <span class="info-value" id="userSurname">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-envelope"></i> Correo:</span>
+                    <span class="info-value" id="userEmail">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar"></i> Miembro desde:</span>
+                    <span class="info-value" id="userCreated">-</span>
+                </div>
+            </div>
+
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://dxtczazqcxxtcukdiloe.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGN6YXpxY3h4dGN1a2RpbG9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNTQ2MDgsImV4cCI6MjA3NDgzMDYwOH0.XmNEXYKA73fWNnaJFtIF3NCXfKX2jsV25GVCiU6BoFE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function loadProfile() {
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError || !session) {
+                    window.location.href = 'login.ejs';
+                    return;
+                }
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .maybeSingle();
+
+                if (profileError) {
+                    console.error('Error loading profile:', profileError);
+                    alert('Error al cargar el perfil');
+                    return;
+                }
+
+                if (profile) {
+                    document.getElementById('userName').textContent = profile.name;
+                    document.getElementById('userSurname').textContent = profile.surname;
+                    document.getElementById('userEmail').textContent = profile.email;
+
+                    const createdDate = new Date(profile.created_at);
+                    document.getElementById('userCreated').textContent = createdDate.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('profileContent').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar el perfil');
+                window.location.href = 'login.ejs';
+            }
+        }
+
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+
+                localStorage.removeItem('supabase_session');
+                localStorage.removeItem('user_profile');
+
+                window.location.href = 'login.ejs';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error al cerrar sesión');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

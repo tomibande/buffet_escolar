@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .auth-page {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
@@ -169,10 +170,10 @@
             
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
-                    <label for="username">Usuario</label>
+                    <label for="email">Correo Electrónico</label>
                     <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" name="username" required placeholder="Ingresa tu usuario" autocomplete="username">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required placeholder="tu@email.com" autocomplete="email">
                     </div>
                 </div>
                 
@@ -208,61 +209,70 @@
                     Admin: <code>admin / admin123</code><br>
                     Buffet: <code>buffet / fragata</code>
                 </p>
+                <p style="font-size: 0.95rem;">¿No tienes una cuenta? <a href="register.html" style="color: #667eea; font-weight: 600; text-decoration: none;">Regístrate aquí</a></p>
             </div>
         </div>
     </div>
 
     <script>
+        const supabaseUrl = 'https://dxtczazqcxxtcukdiloe.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGN6YXpxY3h4dGN1a2RpbG9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNTQ2MDgsImV4cCI6MjA3NDgzMDYwOH0.XmNEXYKA73fWNnaJFtIF3NCXfKX2jsV25GVCiU6BoFE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
             submitBtn.disabled = true;
-            
+
             const formData = new FormData(e.target);
-            const loginData = {
-                username: formData.get('username'),
-                password: formData.get('password')
-            };
-            
+            const email = formData.get('email').trim();
+            const password = formData.get('password');
+
             try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(loginData)
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
                 });
-                
-                const result = await response.json();
-                
-                if (result.success) {
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data.user) {
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .maybeSingle();
+
                     submitBtn.innerHTML = '<i class="fas fa-check"></i> ¡Éxito!';
                     submitBtn.style.background = '#10b981';
-                    
-                    localStorage.setItem('token', result.data.token);
-                    localStorage.setItem('user', JSON.stringify(result.data.user));
-                    
-                    const userRole = result.data.user.role;
+
+                    localStorage.setItem('supabase_session', JSON.stringify(data.session));
+                    localStorage.setItem('user_profile', JSON.stringify(profile));
+
                     setTimeout(() => {
-                        if (userRole === 'buffet') {
-                            window.location.href = '/buffet-dashboard.html';
-                        } else if (userRole === 'admin') {
-                            window.location.href = '/admin-dashboard.html';
-                        } else {
-                            window.location.href = '/';
-                        }
+                        window.location.href = 'profile.html';
                     }, 1000);
                 } else {
-                    showError(result.message || 'Error en el inicio de sesión');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+                    throw new Error('No se pudo iniciar sesión');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showError('Ocurrió un error durante el inicio de sesión');
+                let errorMessage = 'Error al iniciar sesión';
+
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Correo o contraseña incorrectos';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Por favor confirma tu correo electrónico';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                showError(errorMessage);
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
